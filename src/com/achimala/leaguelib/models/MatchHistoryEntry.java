@@ -33,29 +33,29 @@ public class MatchHistoryEntry implements PlayerList {
     private List<LeagueSummoner> _playerTeam, _enemyTeam;
     private Map<Integer, LeagueChampion> _playerChampionSelections;
     private Map<MatchHistoryStatType, Integer> _stats;
-    
+
     public MatchHistoryEntry() {
     }
-        
+
     public MatchHistoryEntry(TypedObject obj, LeagueSummoner primarySummoner) {
         _gameId = obj.getInt("gameId");
         _gameType = obj.getString("gameType");
         _leaver = obj.getBool("leaver");
         _createDate = (Date)obj.get("createDate");
         _queue = LeagueMatchmakingQueue.valueOf(obj.getString("queueType"));
-        
+
         _playerTeam = new ArrayList<LeagueSummoner>();
         _enemyTeam = new ArrayList<LeagueSummoner>();
         _playerChampionSelections = new HashMap<Integer, LeagueChampion>();
         _stats = new HashMap<MatchHistoryStatType, Integer>();
-        
+
         // (for some unknown reason, sometimes the "summonerId" key is 0 in the data returned from Riot)
         // This is the only reason we have to pass the primary summoner into this constructor
         // ...which is pretty dumb
         _playerChampionSelections.put(primarySummoner.getId(), LeagueChampion.getChampionWithId(obj.getInt("championId")));
-        
+
         int playerTeamId = obj.getInt("teamId");
-        
+
         // Riot doesn't include this person in the "fellow players" list, which I suppose makes sense
         _playerTeam.add(primarySummoner);
         for(Object playerObj : obj.getArray("fellowPlayers")) {
@@ -68,79 +68,83 @@ public class MatchHistoryEntry implements PlayerList {
             else
                 _enemyTeam.add(summoner);
         }
-        
+
         for(Object statObj : obj.getArray("statistics")) {
             TypedObject stat = (TypedObject)statObj;
             MatchHistoryStatType type = MatchHistoryStatType.valueOf(stat.getString("statType"));
             _stats.put(type, stat.getInt("value"));
         }
     }
-    
+
     public void setGameId(int id) {
         _gameId = id;
     }
-    
+
     public void setGameType(String type) {
         _gameType = type;
     }
-    
+
     public void setIsLeaver(boolean leaver) {
         _leaver = leaver;
     }
-    
+
     public void setCreationDate(Date date) {
         _createDate = date;
     }
-    
+
     public void setQueue(LeagueMatchmakingQueue queue) {
         _queue = queue;
     }
-    
+
     public int getGameId() {
         return _gameId;
     }
-    
+
     public String getGameType() {
         return _gameType;
     }
-    
+
     public boolean isLeaver() {
         return _leaver;
     }
-    
+
     public Date getCreationDate() {
         return _createDate;
     }
-    
+
     public LeagueMatchmakingQueue getQueue() {
         return _queue;
     }
-    
+
+    @Override
     public List<LeagueSummoner> getPlayerTeam() {
         return _playerTeam;
     }
-    
+
+    @Override
     public List<LeagueSummoner> getEnemyTeam() {
         return _enemyTeam;
     }
-    
+
+    @Override
     public List<LeagueSummoner> getAllPlayers() {
         List<LeagueSummoner> players = new ArrayList<LeagueSummoner>(_playerTeam);
         players.addAll(_enemyTeam);
         return players;
     }
-    
+
+    @Override
     public LeagueChampion getChampionSelectionForSummoner(LeagueSummoner summoner) {
         return _playerChampionSelections.get(summoner.getId());
     }
-    
+
     public int getStat(MatchHistoryStatType type) {
         Integer stat = _stats.get(type);
         if(stat == null)
             return 0;
         return stat.intValue();
     }
-    
+
     public Map<MatchHistoryStatType, Integer> getAllStats() {
         return _stats;
     }

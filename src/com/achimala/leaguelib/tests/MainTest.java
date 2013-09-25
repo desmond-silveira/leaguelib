@@ -16,14 +16,20 @@
 
 package com.achimala.leaguelib.tests;
 
-import com.achimala.leaguelib.connection.*;
-import com.achimala.leaguelib.models.*;
-import com.achimala.leaguelib.errors.*;
-import com.achimala.util.Callback;
 import java.util.Map;
-
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
+import com.achimala.leaguelib.connection.LeagueAccount;
+import com.achimala.leaguelib.connection.LeagueConnection;
+import com.achimala.leaguelib.connection.LeagueServer;
+import com.achimala.leaguelib.errors.LeagueException;
+import com.achimala.leaguelib.models.LeagueChampion;
+import com.achimala.leaguelib.models.LeagueGame;
+import com.achimala.leaguelib.models.LeagueRankedStatType;
+import com.achimala.leaguelib.models.LeagueSummoner;
+import com.achimala.leaguelib.models.LeagueSummonerLeagueStats;
+import com.achimala.util.Callback;
 
 // This tests pretty much everything. It downloads as much information as it can about a given summoner and displays it.
 // NOTE: You must pass in the password of the account(s) being used as a command line argument, so if someone pulls
@@ -34,14 +40,14 @@ public class MainTest {
     private static int count = 0;
     private static ReentrantLock lock = new ReentrantLock();
     private static Condition done = lock.newCondition();
-    
+
     private static void incrementCount() {
         lock.lock();
         count++;
         // System.out.println("+ count = " + count);
         lock.unlock();
     }
-    
+
     private static void decrementCount() {
         lock.lock();
         count--;
@@ -50,33 +56,35 @@ public class MainTest {
         // System.out.println("- count = " + count);
         lock.unlock();
     }
-    
+
     public static void main(String[] args) throws Exception {
         final LeagueConnection c = new LeagueConnection(LeagueServer.NORTH_AMERICA);
-        c.getAccountQueue().addAccount(new LeagueAccount(LeagueServer.NORTH_AMERICA, "3.5.xx", "anshuchimala2", args[0]));
-        c.getAccountQueue().addAccount(new LeagueAccount(LeagueServer.NORTH_AMERICA, "3.5.xx", "anshuchimala3", args[0]));
-        final String SUMMONER_TO_LOOK_UP = "chdmwu";
-        
+        c.getAccountQueue().addAccount(new LeagueAccount(LeagueServer.NORTH_AMERICA, "3.11.xx", "dhalsim2", args[0]));
+//        c.getAccountQueue().addAccount(new LeagueAccount(LeagueServer.NORTH_AMERICA, "3.5.xx", "anshuchimala3", args[0]));
+        final String SUMMONER_TO_LOOK_UP = "dhalsim2";
+
         Map<LeagueAccount, LeagueException> exceptions = c.getAccountQueue().connectAll();
         if(exceptions != null) {
             for(LeagueAccount account : exceptions.keySet())
                 System.out.println(account + " error: " + exceptions.get(account));
             return;
         }
-        
+
         lock.lock();
         incrementCount();
         c.getSummonerService().getSummonerByName(SUMMONER_TO_LOOK_UP, new Callback<LeagueSummoner>() {
+            @Override
             public void onCompletion(LeagueSummoner summoner) {
                 lock.lock();
-                
+
                 System.out.println(summoner.getName() + ":");
                 System.out.println("    accountID:  " + summoner.getAccountId());
                 System.out.println("    summonerID: " + summoner.getId());
-                
+
                 incrementCount();
                 System.out.println("Getting profile data...");
                 c.getSummonerService().fillPublicSummonerData(summoner, new Callback<LeagueSummoner>() {
+                    @Override
                     public void onCompletion(LeagueSummoner summoner) {
                         lock.lock();
                         System.out.println("Profile:");
@@ -87,7 +95,8 @@ public class MainTest {
                         decrementCount();
                         lock.unlock();
                     }
-                    
+
+                    @Override
                     public void onError(Exception ex) {
                         lock.lock();
                         System.out.println(ex.getMessage());
@@ -95,10 +104,11 @@ public class MainTest {
                         lock.unlock();
                     }
                 });
-                
+
                 incrementCount();
                 System.out.println("Getting leagues data...");
                 c.getLeaguesService().fillSoloQueueLeagueData(summoner, new Callback<LeagueSummoner>() {
+                    @Override
                     public void onCompletion(LeagueSummoner summoner) {
                         lock.lock();
                         LeagueSummonerLeagueStats stats = summoner.getLeagueStats();
@@ -117,7 +127,8 @@ public class MainTest {
                         decrementCount();
                         lock.unlock();
                     }
-                    
+
+                    @Override
                     public void onError(Exception ex) {
                         lock.lock();
                         System.out.println(ex.getMessage());
@@ -125,15 +136,16 @@ public class MainTest {
                         lock.unlock();
                     }
                 });
-                
+
                 incrementCount();
                 System.out.println("Getting champ data...");
                 c.getPlayerStatsService().fillRankedStats(summoner, new Callback<LeagueSummoner>() {
+                    @Override
                     public void onCompletion(LeagueSummoner summoner) {
                         lock.lock();
                         for(LeagueChampion champ : summoner.getRankedStats().getAllPlayedChampions())
                             System.out.println("Has played " + champ.getName());
-                        
+
                         LeagueChampion champ = LeagueChampion.getChampionWithName("Anivia");
                         Map<LeagueRankedStatType, Integer> stats = summoner.getRankedStats().getAllStatsForChampion(champ);
                         if(stats == null) {
@@ -148,7 +160,8 @@ public class MainTest {
                         decrementCount();
                         lock.unlock();
                     }
-                    
+
+                    @Override
                     public void onError(Exception ex) {
                         lock.lock();
                         System.out.println(ex.getMessage());
@@ -156,26 +169,27 @@ public class MainTest {
                         lock.unlock();
                     }
                 });
-                
+
                 incrementCount();
                 System.out.println("Getting game data...");
                 c.getGameService().fillActiveGameData(summoner, new Callback<LeagueSummoner>() {
+                    @Override
                     public void onCompletion(LeagueSummoner summoner) {
                         lock.lock();
                         if(summoner.getActiveGame() != null) {
-			    LeagueGame game = summoner.getActiveGame();
+                LeagueGame game = summoner.getActiveGame();
                             System.out.println("PLAYER TEAM (" + game.getPlayerTeamType() + "):");
                             for(LeagueSummoner sum : summoner.getActiveGame().getPlayerTeam())
                                 System.out.println("    " + sum);
                             System.out.println("ENEMY TEAM (" + game.getEnemyTeamType() + "):");
                             for(LeagueSummoner sum : summoner.getActiveGame().getEnemyTeam())
                                 System.out.println("    " + sum);
-			    System.out.println("PLAYER TEAM BANS:");
-			    for(LeagueChampion champion : game.getBannedChampionsForTeam(game.getPlayerTeamType()))
-				System.out.println("    " + champion.getName());
-			    System.out.println("ENEMY TEAM BANS:");
-			    for(LeagueChampion champion : game.getBannedChampionsForTeam(game.getEnemyTeamType()))
-				System.out.println("    " + champion.getName());
+                System.out.println("PLAYER TEAM BANS:");
+                for(LeagueChampion champion : game.getBannedChampionsForTeam(game.getPlayerTeamType()))
+                System.out.println("    " + champion.getName());
+                System.out.println("ENEMY TEAM BANS:");
+                for(LeagueChampion champion : game.getBannedChampionsForTeam(game.getEnemyTeamType()))
+                System.out.println("    " + champion.getName());
                         } else {
                             System.out.println("NOT IN GAME");
                         }
@@ -184,7 +198,8 @@ public class MainTest {
                         decrementCount();
                         lock.unlock();
                     }
-                    
+
+                    @Override
                     public void onError(Exception ex) {
                         lock.lock();
                         if(ex instanceof LeagueException) {
@@ -196,10 +211,11 @@ public class MainTest {
                         lock.unlock();
                     }
                 });
-                
+
                 decrementCount();
                 lock.unlock();
             }
+            @Override
             public void onError(Exception ex) {
                 lock.lock();
                 ex.printStackTrace();

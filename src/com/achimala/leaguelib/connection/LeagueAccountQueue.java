@@ -16,19 +16,17 @@
 
 package com.achimala.leaguelib.connection;
 
-import com.achimala.leaguelib.errors.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ListIterator;
+
+import com.achimala.leaguelib.errors.LeagueException;
 
 public class LeagueAccountQueue {
     private ArrayList<LeagueAccount> _internalQueue = new ArrayList<LeagueAccount>();
-    private LeagueServer _server;
     private int _index = 0;
-    
+
     /**
      * Adds an account to the queue.
      * (Thread-safe)
@@ -38,7 +36,7 @@ public class LeagueAccountQueue {
             account.connect();
         _internalQueue.add(account);
     }
-    
+
     /**
      * Gets the next account off the queue that is connected.
      * Returns null if no connected accounts are available.
@@ -56,14 +54,14 @@ public class LeagueAccountQueue {
         // no accounts are connected
         return null;
     }
-    
+
     /**
      * Returns a list view of all the accounts in the queue.
      */
     public List<LeagueAccount> getAllAccounts() {
         return _internalQueue;
     }
-    
+
     /**
     * Iterates through accounts in the queues and connects any that are disconnected.
     * In a Play! app or similar, don't call this as it connects each account synchronously
@@ -82,7 +80,7 @@ public class LeagueAccountQueue {
         }
         return exceptions.size() > 0 ? exceptions : null;
     }
-    
+
     /**
      * Returns true iff there exists an account that is connected.
      */
@@ -93,7 +91,7 @@ public class LeagueAccountQueue {
         }
         return false;
     }
-    
+
     /**
      * Returns true iff every account is connected.
      */

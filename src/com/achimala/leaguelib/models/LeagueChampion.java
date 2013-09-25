@@ -23,7 +23,7 @@ import java.util.HashMap;
 public class LeagueChampion {
     private static BidirectionalMap<Integer, String> _modelMap;
     private static HashMap<Integer, LeagueChampion> _champMap;
-    
+
     static {
         _modelMap = new BidirectionalMap<Integer, String>();
         _modelMap.put(  0,  null); // represents a catch-all champion for stats
@@ -142,61 +142,62 @@ public class LeagueChampion {
         _modelMap.put(127, "Lissandra");
         _modelMap.put(266, "Aatrox");
         _modelMap.put(236, "Lucian");
-        
+
         _champMap = new HashMap<Integer, LeagueChampion>();
     }
-    
+
     public static String getNameForChampion(int id) {
         return _modelMap.get(id);
     }
-    
+
     public static int getIdForChampion(String name) {
         return _modelMap.getKey(name);
     }
-    
+
     public static LeagueChampion getChampionWithName(String name) {
         return getChampionWithId(_modelMap.getKey(name));
     }
-    
+
     public static LeagueChampion getChampionWithId(int id) {
         if(!_champMap.containsKey(id))
             _champMap.put(id, new LeagueChampion(id));
         return _champMap.get(id);
     }
-    
+
     private String _name;
     private int _id;
-    
+
     private LeagueChampion(String name) {
         _name = name;
         _id = getIdForChampion(name);
     }
-    
+
     private LeagueChampion(int id) {
         _name = getNameForChampion(id);
         _id = id;
     }
-    
+
     public void setName(String name) {
         _name = name;
     }
-    
+
     public void setId(int id) {
         _id = id;
     }
-    
+
     public String getName() {
         return _name;
     }
-    
+
     public int getId() {
         return _id;
     }
-    
+
+    @Override
     public String toString() {
         return "<Champion " + _name + "(#" + _id + ")>";
     }
-    
+
     // public String getFilename() {
     //     return getName().toLowerCase().replaceAll("[^a-z0-9]", "");
     // }

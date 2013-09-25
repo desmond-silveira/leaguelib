@@ -17,33 +17,38 @@
 
 package com.achimala.leaguelib.services;
 
-import com.achimala.leaguelib.connection.*;
-import com.achimala.leaguelib.models.*;
-import com.achimala.leaguelib.errors.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.achimala.leaguelib.connection.LeagueConnection;
+import com.achimala.leaguelib.errors.LeagueException;
+import com.achimala.leaguelib.models.LeagueCompetitiveSeason;
+import com.achimala.leaguelib.models.LeagueSummoner;
+import com.achimala.leaguelib.models.LeagueSummonerRankedStats;
+import com.achimala.leaguelib.models.MatchHistoryEntry;
 import com.achimala.util.Callback;
 import com.gvaneyck.rtmp.TypedObject;
 
-import java.util.List;
-import java.util.ArrayList;
-
 public class PlayerStatsService extends LeagueAbstractService {
     private final String SUMMONERS_RIFT = "CLASSIC";
-    
+
     public PlayerStatsService(LeagueConnection connection) {
         super(connection);
     }
-    
+
+    @Override
     public String getServiceName() {
         return "playerStatsService";
     }
-    
+
     public void fillRankedStats(LeagueSummoner summoner) throws LeagueException {
         TypedObject obj = call("getAggregatedStats", new Object[] { summoner.getAccountId(), SUMMONERS_RIFT, LeagueCompetitiveSeason.CURRENT.toString() });
         summoner.setRankedStats(new LeagueSummonerRankedStats(obj.getTO("body")));
     }
-    
+
     public void fillRankedStats(final LeagueSummoner summoner, final Callback<LeagueSummoner> callback) {
         callAsynchronously("getAggregatedStats", new Object[] { summoner.getAccountId(), SUMMONERS_RIFT, LeagueCompetitiveSeason.CURRENT.toString() }, new Callback<TypedObject>() {
+            @Override
             public void onCompletion(TypedObject obj) {
                 try {
                     summoner.setRankedStats(new LeagueSummonerRankedStats(obj.getTO("body")));
@@ -52,13 +57,14 @@ public class PlayerStatsService extends LeagueAbstractService {
                     callback.onError(ex);
                 }
             }
-            
+
+            @Override
             public void onError(Exception ex) {
                 callback.onError(ex);
             }
         });
     }
-    
+
     private List<MatchHistoryEntry> getMatchHistoryEntriesFromResult(TypedObject obj, LeagueSummoner summoner) {
         Object[] games = obj.getTO("body").getArray("gameStatistics");
         if(games == null || games.length == 0)
@@ -69,7 +75,7 @@ public class PlayerStatsService extends LeagueAbstractService {
             recentGames.add(new MatchHistoryEntry((TypedObject)game, summoner));
         return recentGames;
     }
-    
+
     public void fillMatchHistory(LeagueSummoner summoner) throws LeagueException {
         // IMPORTANT: Riot doesn't provide the summoner names of fellow players, only IDs
         // This means that after calling fillMatchHistory, the match history of the summoner is populated
@@ -79,13 +85,15 @@ public class PlayerStatsService extends LeagueAbstractService {
         TypedObject obj = call("getRecentGames", new Object[] { summoner.getAccountId() });
         summoner.setMatchHistory(getMatchHistoryEntriesFromResult(obj, summoner));
     }
-    
+
     public void fillMatchHistory(final LeagueSummoner summoner, final Callback<LeagueSummoner> callback) {
         callAsynchronously("getRecentGames", new Object[] { summoner.getAccountId() }, new Callback<TypedObject>() {
+            @Override
             public void onCompletion(TypedObject obj) {
                 summoner.setMatchHistory(getMatchHistoryEntriesFromResult(obj, summoner));
                 callback.onCompletion(summoner);
             }
+            @Override
             public void onError(Exception ex) {
                 callback.onError(ex);
             }

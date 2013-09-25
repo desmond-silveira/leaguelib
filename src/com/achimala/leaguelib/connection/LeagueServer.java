@@ -27,29 +27,30 @@ public enum LeagueServer {
     OCEANIA("OCE", "Oceania");
     // Garena servers...
     // PublicBetaEnvironment
-    
+
     private String _serverCode, _publicName;
 
     private LeagueServer(String serverCode, String publicName) {
         _serverCode = serverCode;
         _publicName = publicName;
     }
-    
+
     public static LeagueServer findServerByCode(String code) {
         for(LeagueServer server : LeagueServer.values())
             if(server.getServerCode().equalsIgnoreCase(code))
                 return server;
         return null;
     }
-    
+
     public String getServerCode() {
         return _serverCode;
     }
-    
+
     public String getPublicName() {
         return _publicName;
     }
-    
+
+    @Override
     public String toString() {
         return "<LeagueServer:" + _publicName + " (" + _serverCode + ")>";
     }

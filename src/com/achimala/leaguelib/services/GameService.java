@@ -16,9 +16,11 @@
 
 package com.achimala.leaguelib.services;
 
-import com.achimala.leaguelib.connection.*;
-import com.achimala.leaguelib.models.*;
-import com.achimala.leaguelib.errors.*;
+import com.achimala.leaguelib.connection.LeagueConnection;
+import com.achimala.leaguelib.errors.LeagueErrorCode;
+import com.achimala.leaguelib.errors.LeagueException;
+import com.achimala.leaguelib.models.LeagueGame;
+import com.achimala.leaguelib.models.LeagueSummoner;
 import com.achimala.util.Callback;
 import com.gvaneyck.rtmp.TypedObject;
 
@@ -26,12 +28,14 @@ public class GameService extends LeagueAbstractService {
     public GameService(LeagueConnection connection) {
         super(connection);
     }
-    
+
+    @Override
     public String getServiceName() {
         return "gameService";
     }
-    
+
     // FIXME: Not sure if this is the right way to handle this
+    @Override
     protected TypedObject handleResult(TypedObject result) throws LeagueException {
         if(result.get("result").equals("_error")) {
             String reason = result.getExceptionMessage();
@@ -41,7 +45,7 @@ public class GameService extends LeagueAbstractService {
         }
         return super.handleResult(result);
     }
-    
+
     private void createAndSetGame(LeagueSummoner summoner, TypedObject obj) {
         if(obj == null || obj.getTO("body") == null)
             summoner.setActiveGame(null);
@@ -50,19 +54,21 @@ public class GameService extends LeagueAbstractService {
             summoner.setActiveGame(game);
         }
     }
-    
+
     public void fillActiveGameData(LeagueSummoner summoner) throws LeagueException {
         TypedObject obj = call("retrieveInProgressSpectatorGameInfo", new Object[] { summoner.getInternalName() });
         createAndSetGame(summoner, obj);
     }
-    
+
     public void fillActiveGameData(final LeagueSummoner summoner, final Callback<LeagueSummoner> callback) {
         callAsynchronously("retrieveInProgressSpectatorGameInfo", new Object[] { summoner.getInternalName() }, new Callback<TypedObject>() {
+            @Override
             public void onCompletion(TypedObject obj) {
                 createAndSetGame(summoner, obj);
                 callback.onCompletion(summoner);
             }
-            
+
+            @Override
             public void onError(Exception ex) {
                 callback.onError(ex);
             }

@@ -16,9 +16,11 @@
 
 package com.achimala.leaguelib.services;
 
-import com.achimala.leaguelib.connection.*;
-import com.achimala.leaguelib.models.*;
-import com.achimala.leaguelib.errors.*;
+import com.achimala.leaguelib.connection.LeagueConnection;
+import com.achimala.leaguelib.errors.LeagueException;
+import com.achimala.leaguelib.models.LeagueMatchmakingQueue;
+import com.achimala.leaguelib.models.LeagueSummoner;
+import com.achimala.leaguelib.models.LeagueSummonerLeagueStats;
 import com.achimala.util.Callback;
 import com.gvaneyck.rtmp.TypedObject;
 
@@ -26,11 +28,12 @@ public class LeaguesService extends LeagueAbstractService {
     public LeaguesService(LeagueConnection connection) {
         super(connection);
     }
-    
+
+    @Override
     public String getServiceName() {
         return "leaguesServiceProxy";
     }
-    
+
     // FIXME: Not sure if this is the right way to handle this
     // protected TypedObject handleResult(TypedObject result) throws LeagueException {
     //     if(result.get("result").equals("_error")) {
@@ -44,7 +47,7 @@ public class LeaguesService extends LeagueAbstractService {
     //         return null;
     //     return super.handleResult(result);
     // }
-    
+
     public void fillSoloQueueLeagueData(LeagueSummoner summoner) throws LeagueException {
         TypedObject obj = call("getLeagueForPlayer", new Object[] { summoner.getId(), LeagueMatchmakingQueue.RANKED_SOLO_5x5.toString() });
         if(obj == null || obj.getTO("body") == null) {
@@ -53,9 +56,10 @@ public class LeaguesService extends LeagueAbstractService {
         }
         summoner.setLeagueStats(new LeagueSummonerLeagueStats(obj.getTO("body")));
     }
-    
+
     public void fillSoloQueueLeagueData(final LeagueSummoner summoner, final Callback<LeagueSummoner> callback) {
         callAsynchronously("getLeagueForPlayer", new Object[] { summoner.getId(), LeagueMatchmakingQueue.RANKED_SOLO_5x5.toString() }, new Callback<TypedObject>() {
+            @Override
             public void onCompletion(TypedObject obj) {
                 try {
                     if(obj == null || obj.getTO("body") == null)
@@ -67,6 +71,7 @@ public class LeaguesService extends LeagueAbstractService {
                     callback.onError(ex);
                 }
             }
+            @Override
             public void onError(Exception ex) {
                 callback.onError(ex);
             }

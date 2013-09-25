@@ -16,23 +16,23 @@
 
 package com.achimala.leaguelib.services;
 
-import com.gvaneyck.rtmp.TypedObject;
-import com.achimala.leaguelib.connection.*;
-import com.achimala.leaguelib.errors.*;
+import com.achimala.leaguelib.connection.LeagueConnection;
+import com.achimala.leaguelib.errors.LeagueErrorCode;
+import com.achimala.leaguelib.errors.LeagueException;
 import com.achimala.util.Callback;
-import java.io.IOException;
+import com.gvaneyck.rtmp.TypedObject;
 
 public abstract class LeagueAbstractService {
     protected LeagueConnection _connection = null;
-    
+
     public LeagueAbstractService(LeagueConnection connection) {
         _connection = connection;
     }
-    
+
     protected LeagueConnection getConnection() {
         return _connection;
     }
-    
+
     protected TypedObject handleResult(TypedObject result) throws LeagueException {
         if(result.get("result").equals("_error")) {
             System.err.println(result);
@@ -41,7 +41,7 @@ public abstract class LeagueAbstractService {
         }
         return result.getTO("data");
     }
-    
+
     protected TypedObject call(String method, Object arguments) throws LeagueException {
         return handleResult(_connection.invoke(getServiceName(), method, arguments));
         /*try {
@@ -52,9 +52,10 @@ public abstract class LeagueAbstractService {
             throw new LeagueException(LeagueErrorCode.NETWORK_ERROR, ex.getMessage());
         }*/
     }
-    
+
     protected void callAsynchronously(String method, Object arguments, final Callback<TypedObject> callback) {
         _connection.invokeWithCallback(getServiceName(), method, arguments, new Callback<TypedObject>() {
+            @Override
             public void onCompletion(TypedObject obj) {
                 try {
                     callback.onCompletion(handleResult(obj));
@@ -62,7 +63,8 @@ public abstract class LeagueAbstractService {
                     callback.onError(ex);
                 }
             }
-            
+
+            @Override
             public void onError(Exception ex) {
                 callback.onError(ex);
             }
@@ -82,9 +84,10 @@ public abstract class LeagueAbstractService {
             callback.onError(ex);
         }*/
     }
-    
+
     public abstract String getServiceName();
-    
+
+    @Override
     public String toString() {
         return String.format("<Service:%s>", getServiceName());
     }

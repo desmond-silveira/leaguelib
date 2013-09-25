@@ -16,11 +16,14 @@
 
 package com.achimala.leaguelib.connection;
 
+import com.achimala.leaguelib.errors.LeagueErrorCode;
+import com.achimala.leaguelib.errors.LeagueException;
+import com.achimala.leaguelib.services.GameService;
+import com.achimala.leaguelib.services.LeaguesService;
+import com.achimala.leaguelib.services.PlayerStatsService;
+import com.achimala.leaguelib.services.SummonerService;
 import com.achimala.util.Callback;
 import com.gvaneyck.rtmp.TypedObject;
-import com.achimala.leaguelib.services.*;
-import com.achimala.leaguelib.errors.*;
-import java.io.IOException;
 
 public class LeagueConnection {
     private SummonerService _summonerService;
@@ -28,47 +31,48 @@ public class LeagueConnection {
     private PlayerStatsService _playerStatsService;
     private GameService _gameService;
     private LeagueServer _server;
-    
+
     private LeagueAccountQueue _accountQueue;
-    
+
     public LeagueConnection() {
         this(null);
     }
-    
+
     public LeagueConnection(LeagueServer server) {
         _server = server;
         _accountQueue = new LeagueAccountQueue();
     }
-    
+
+    @Override
     public String toString() {
         return String.format("<LeagueConnection (%d accounts)>", _accountQueue.getAllAccounts().size());
     }
-    
+
     public void setAccountQueue(LeagueAccountQueue queue) {
         _accountQueue = queue;
     }
-    
+
     public void setServer(LeagueServer server) {
         _server = server;
     }
-    
+
     public LeagueAccountQueue getAccountQueue() {
         return _accountQueue;
     }
-    
+
     public LeagueServer getServer() {
         return _server;
     }
-    
+
     //// RTMP
-    
+
     private LeagueAccount nextValidAccount() throws LeagueException {
         LeagueAccount account = _accountQueue.nextAccount();
         if(account == null)
             throw new LeagueException(LeagueErrorCode.RTMP_ERROR, toString() + " has no connected account");
         return account;
     }
-    
+
     /**
      * Performs an API call on the League of Legends RTMP server.
      * Returns the raw packet data from the API call.
@@ -78,7 +82,7 @@ public class LeagueConnection {
     public TypedObject invoke(String service, String method, Object arguments) throws LeagueException {
         return nextValidAccount().invoke(service, method, arguments);
     }
-    
+
     /**
      * Performs an API call on the League of Legends RTMP server through whichever account the account queue chooses.
      * Same as invoke() but takes place asynchronously on a background thread.
@@ -90,9 +94,9 @@ public class LeagueConnection {
             callback.onError(ex);
         }
     }
-    
+
     //// Services
-    
+
     /**
      * Represents `summonerService` on the League of Legends RTMP API.
      * This service allows you to interact with Summoners, including retrieving their profile information and other data.
@@ -103,7 +107,7 @@ public class LeagueConnection {
             _summonerService = new SummonerService(this);
         return _summonerService;
     }
-    
+
     /**
      * Represents `leaguesServiceProxy` on the League of Legends RTMP API.
      * This service allows you to interact with the new leagues ladder ranking system.
@@ -115,7 +119,7 @@ public class LeagueConnection {
             _leaguesService = new LeaguesService(this);
         return _leaguesService;
     }
-    
+
     /**
      * Represents `playerStatsService` on the League of Legends RTMP API.
      * This service allows you to interact with player ranked statistics (and some normal game statistics).
@@ -126,7 +130,7 @@ public class LeagueConnection {
             _playerStatsService = new PlayerStatsService(this);
         return _playerStatsService;
     }
-    
+
     /**
      * Represents `gameService` on the League of Legends RTMP API.
      * This service allows you to retrieve real-time information about ongoing games.
