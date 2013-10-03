@@ -26,8 +26,11 @@ import java.util.Date;
 public class MatchHistoryEntry implements PlayerList {
     int _gameId;
     private String _gameType;
-    // TODO: Summoner spells
+    private int _summonerSpell1;
+    private int _summonerSpell2;
     private boolean _leaver;
+    private boolean _afk;
+    private boolean _premadeTeam;
     private Date _createDate;
     private LeagueMatchmakingQueue _queue;
     private List<LeagueSummoner> _playerTeam, _enemyTeam;
@@ -41,6 +44,10 @@ public class MatchHistoryEntry implements PlayerList {
         _gameId = obj.getInt("gameId");
         _gameType = obj.getString("gameType");
         _leaver = obj.getBool("leaver");
+        _afk = obj.getBool("afk");
+        _premadeTeam = obj.getBool("premadeTeam");
+        _summonerSpell1 = obj.getInt("spell1");
+        _summonerSpell2 = obj.getInt("spell2");
         _createDate = (Date)obj.get("createDate");
         _queue = LeagueMatchmakingQueue.valueOf(obj.getString("queueType"));
 
@@ -88,6 +95,14 @@ public class MatchHistoryEntry implements PlayerList {
         _leaver = leaver;
     }
 
+    public void setIsAfk(boolean afk) {
+        _afk = afk;
+    }
+
+    public void setPremadeTeam(boolean premadeTeam) {
+        _premadeTeam = premadeTeam;
+    }
+
     public void setCreationDate(Date date) {
         _createDate = date;
     }
@@ -106,6 +121,22 @@ public class MatchHistoryEntry implements PlayerList {
 
     public boolean isLeaver() {
         return _leaver;
+    }
+
+    public boolean isAfk() {
+        return _afk;
+    }
+
+    public boolean isPremadeTeam() {
+        return _premadeTeam;
+    }
+
+    public int getSummonerSpell2() {
+        return _summonerSpell2;
+    }
+
+    public int getSummonerSpell1() {
+        return _summonerSpell1;
     }
 
     public Date getCreationDate() {

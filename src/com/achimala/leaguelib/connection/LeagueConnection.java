@@ -20,6 +20,7 @@ import com.achimala.leaguelib.errors.LeagueErrorCode;
 import com.achimala.leaguelib.errors.LeagueException;
 import com.achimala.leaguelib.services.GameService;
 import com.achimala.leaguelib.services.LeaguesService;
+import com.achimala.leaguelib.services.MasteryService;
 import com.achimala.leaguelib.services.PlayerStatsService;
 import com.achimala.leaguelib.services.SummonerService;
 import com.achimala.util.Callback;
@@ -30,6 +31,7 @@ public class LeagueConnection {
     private LeaguesService _leaguesService;
     private PlayerStatsService _playerStatsService;
     private GameService _gameService;
+    private MasteryService _masteryService;
     private LeagueServer _server;
 
     private LeagueAccountQueue _accountQueue;
@@ -141,5 +143,11 @@ public class LeagueConnection {
         if(_gameService == null)
             _gameService = new GameService(this);
         return _gameService;
+    }
+
+    public MasteryService getMasteryService() {
+        if (_masteryService == null)
+            _masteryService = new MasteryService(this);
+        return _masteryService;
     }
 }

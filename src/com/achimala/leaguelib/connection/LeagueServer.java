@@ -16,6 +16,9 @@
 
 package com.achimala.leaguelib.connection;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum LeagueServer {
     NORTH_AMERICA("NA", "North America"),
     EUROPE_WEST("EUW", "Europe West"),
@@ -24,9 +27,18 @@ public enum LeagueServer {
     KOREA("KR", "Korea"),
     LATIN_AMERICA_NORTH("LAN", "Latin America North"),
     LATIN_AMERICA_SOUTH("LAS", "Latin America South"),
-    OCEANIA("OCE", "Oceania");
+    OCEANIA("OCE", "Oceania"),
+    RUSSIA("RU", "Russia"),
+    TURKEY("TR","Turkey");
     // Garena servers...
     // PublicBetaEnvironment
+
+    private static final Map<String, LeagueServer> stringToEnum = new HashMap<>();
+    static {
+        for (LeagueServer leagueServer : values()) {
+            stringToEnum.put(leagueServer._serverCode, leagueServer);
+        }
+    }
 
     private String _serverCode, _publicName;
 
@@ -53,5 +65,9 @@ public enum LeagueServer {
     @Override
     public String toString() {
         return "<LeagueServer:" + _publicName + " (" + _serverCode + ")>";
+    }
+
+    public static LeagueServer fromString(String str) {
+        return stringToEnum.get(str.toUpperCase());
     }
 }

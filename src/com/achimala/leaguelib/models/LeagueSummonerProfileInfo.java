@@ -19,28 +19,32 @@ package com.achimala.leaguelib.models;
 import com.gvaneyck.rtmp.TypedObject;
 
 public class LeagueSummonerProfileInfo {
-    private LeagueRankedTier _seasonOneTier, _seasonTwoTier;
-    // TODO: Runes and masteries...
-    
+    private LeagueRankedTier _seasonOneTier = LeagueRankedTier.UNRANKED;
+    private LeagueRankedTier _seasonTwoTier = LeagueRankedTier.UNRANKED;
+
     public LeagueSummonerProfileInfo() {
     }
-    
+
     public LeagueSummonerProfileInfo(TypedObject obj) {
-        _seasonTwoTier = LeagueRankedTier.valueOf(obj.getString("seasonTwoTier"));
+        String s1 = obj.getString("seasonOneTier");
+        String s2 = obj.getString("seasonTwoTier");
+
+        if (s1 != null) _seasonOneTier = LeagueRankedTier.valueOf(s1);
+        if (s2 != null) _seasonTwoTier = LeagueRankedTier.valueOf(s2);
     }
-    
+
     public void setSeasonOneTier(LeagueRankedTier tier) {
         _seasonOneTier = tier;
     }
-    
+
     public void setSeasonTwoTier(LeagueRankedTier tier) {
         _seasonTwoTier = tier;
     }
-    
+
     public LeagueRankedTier getSeasonOneTier() {
         return _seasonOneTier;
     }
-    
+
     public LeagueRankedTier getSeasonTwoTier() {
         return _seasonTwoTier;
     }

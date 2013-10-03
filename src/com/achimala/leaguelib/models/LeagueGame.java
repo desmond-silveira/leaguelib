@@ -16,13 +16,17 @@
 
 package com.achimala.leaguelib.models;
 
-import com.gvaneyck.rtmp.TypedObject;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Comparator;
-import java.util.Arrays;
+import java.util.Set;
+
+import com.gvaneyck.rtmp.TypedObject;
 
 public class LeagueGame implements PlayerList {
 
@@ -36,6 +40,7 @@ public class LeagueGame implements PlayerList {
     private Map<String, LeagueChampion> _playerChampionSelections;
     private Map<String, LeagueSummoner> _summoners;
     private Map<TeamType, List<LeagueChampion>> _bannedChampions;
+    private Map<Double, Set<LeagueSummoner>> premades;
 
     public LeagueGame() {
     }
@@ -48,6 +53,16 @@ public class LeagueGame implements PlayerList {
                 sum = primarySummoner;
             _summoners.put(sum.getInternalName(), sum);
             list.add(sum);
+            Double teamParticipantId = to.getDouble("teamParticipantId");
+            if (teamParticipantId != null) {
+                if (!premades.containsKey(teamParticipantId)) {
+                    Set<LeagueSummoner> premade = new HashSet<LeagueSummoner>();
+                    premade.add(sum);
+                    premades.put(teamParticipantId, premade);
+                } else {
+                    premades.get(teamParticipantId).add(sum);
+                }
+            }
         }
     }
 
@@ -57,9 +72,10 @@ public class LeagueGame implements PlayerList {
         _gameType = obj.getString("gameType");
         _gameMode = obj.getString("gameMode");
         _queue = LeagueMatchmakingQueue.valueOf(obj.getString("queueTypeName"));
-        _playerTeam = new ArrayList<LeagueSummoner>();
-        _enemyTeam = new ArrayList<LeagueSummoner>();
+        _playerTeam = new ArrayList<LeagueSummoner>(5);
+        _enemyTeam = new ArrayList<LeagueSummoner>(5);
         _summoners = new HashMap<String, LeagueSummoner>();
+        premades = new HashMap<Double,Set<LeagueSummoner>>();
         fillListWithPlayers(_playerTeam, obj.getArray("teamOne"), primarySummoner);
         fillListWithPlayers(_enemyTeam, obj.getArray("teamTwo"), primarySummoner);
         if(!_playerTeam.contains(primarySummoner))
@@ -155,15 +171,18 @@ public class LeagueGame implements PlayerList {
     }
 
     public TeamType getPlayerTeamType() {
-    return _playerTeamType;
+        return _playerTeamType;
     }
 
     public TeamType getEnemyTeamType() {
-    return _enemyTeamType;
+        return _enemyTeamType;
     }
 
     public List<LeagueChampion> getBannedChampionsForTeam(TeamType type) {
-    return _bannedChampions.get(type);
+        return _bannedChampions.get(type);
     }
 
+    public Collection<Set<LeagueSummoner>> getPremades(){
+        return premades.values();
+    }
 }

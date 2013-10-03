@@ -51,22 +51,26 @@ public class MainTest {
     private static void decrementCount() {
         lock.lock();
         count--;
-        if(count == 0)
+        if(count == 0) {
             done.signal();
+        }
         // System.out.println("- count = " + count);
         lock.unlock();
     }
 
     public static void main(String[] args) throws Exception {
         final LeagueConnection c = new LeagueConnection(LeagueServer.NORTH_AMERICA);
-        c.getAccountQueue().addAccount(new LeagueAccount(LeagueServer.NORTH_AMERICA, "3.11.xx", "dhalsim2", args[0]));
-//        c.getAccountQueue().addAccount(new LeagueAccount(LeagueServer.NORTH_AMERICA, "3.5.xx", "anshuchimala3", args[0]));
+        c.getAccountQueue().addAccount(new LeagueAccount(
+                LeagueServer.NORTH_AMERICA, "3.12.xx", "dhalsim2", args[0]));
+//        c.getAccountQueue().addAccount(new LeagueAccount(
+//                LeagueServer.NORTH_AMERICA, "3.5.xx", "anshuchimala3", args[0]));
         final String SUMMONER_TO_LOOK_UP = "dhalsim2";
 
         Map<LeagueAccount, LeagueException> exceptions = c.getAccountQueue().connectAll();
         if(exceptions != null) {
-            for(LeagueAccount account : exceptions.keySet())
+            for(LeagueAccount account : exceptions.keySet()) {
                 System.out.println(account + " error: " + exceptions.get(account));
+            }
             return;
         }
 
@@ -88,8 +92,10 @@ public class MainTest {
                     public void onCompletion(LeagueSummoner summoner) {
                         lock.lock();
                         System.out.println("Profile:");
-                        System.out.println("    S1: " + summoner.getProfileInfo().getSeasonOneTier());
-                        System.out.println("    S2: " + summoner.getProfileInfo().getSeasonTwoTier());
+                        System.out.println("    S1: "
+                                + summoner.getProfileInfo().getSeasonOneTier());
+                        System.out.println("    S2: "
+                                + summoner.getProfileInfo().getSeasonTwoTier());
                         System.out.println();
                         System.out.flush();
                         decrementCount();
@@ -143,17 +149,21 @@ public class MainTest {
                     @Override
                     public void onCompletion(LeagueSummoner summoner) {
                         lock.lock();
-                        for(LeagueChampion champ : summoner.getRankedStats().getAllPlayedChampions())
+                        for (LeagueChampion champ
+                                : summoner.getRankedStats().getAllPlayedChampions()) {
                             System.out.println("Has played " + champ.getName());
+                        }
 
                         LeagueChampion champ = LeagueChampion.getChampionWithName("Anivia");
-                        Map<LeagueRankedStatType, Integer> stats = summoner.getRankedStats().getAllStatsForChampion(champ);
+                        Map<LeagueRankedStatType, Integer> stats =
+                                summoner.getRankedStats().getAllStatsForChampion(champ);
                         if(stats == null) {
                             System.out.println("No stats for " + champ);
                         } else {
                             System.out.println("All stats for " + champ + ":");
-                            for(LeagueRankedStatType type : LeagueRankedStatType.values())
+                            for(LeagueRankedStatType type : LeagueRankedStatType.values()) {
                                 System.out.println("    " + type + " = " + stats.get(type));
+                            }
                             System.out.println();
                         }
                         System.out.flush();
@@ -176,20 +186,26 @@ public class MainTest {
                     @Override
                     public void onCompletion(LeagueSummoner summoner) {
                         lock.lock();
-                        if(summoner.getActiveGame() != null) {
-                LeagueGame game = summoner.getActiveGame();
+                        LeagueGame game = summoner.getActiveGame();
+                        if (game != null) {
                             System.out.println("PLAYER TEAM (" + game.getPlayerTeamType() + "):");
-                            for(LeagueSummoner sum : summoner.getActiveGame().getPlayerTeam())
+                            for (LeagueSummoner sum : game.getPlayerTeam()) {
                                 System.out.println("    " + sum);
+                            }
                             System.out.println("ENEMY TEAM (" + game.getEnemyTeamType() + "):");
-                            for(LeagueSummoner sum : summoner.getActiveGame().getEnemyTeam())
+                            for(LeagueSummoner sum : game.getEnemyTeam()) {
                                 System.out.println("    " + sum);
-                System.out.println("PLAYER TEAM BANS:");
-                for(LeagueChampion champion : game.getBannedChampionsForTeam(game.getPlayerTeamType()))
-                System.out.println("    " + champion.getName());
-                System.out.println("ENEMY TEAM BANS:");
-                for(LeagueChampion champion : game.getBannedChampionsForTeam(game.getEnemyTeamType()))
-                System.out.println("    " + champion.getName());
+                            }
+                            System.out.println("PLAYER TEAM BANS:");
+                            for(LeagueChampion champion
+                                    : game.getBannedChampionsForTeam(game.getPlayerTeamType())) {
+                                System.out.println("    " + champion.getName());
+                            }
+                            System.out.println("ENEMY TEAM BANS:");
+                            for(LeagueChampion champion
+                                    : game.getBannedChampionsForTeam(game.getEnemyTeamType())) {
+                                System.out.println("    " + champion.getName());
+                            }
                         } else {
                             System.out.println("NOT IN GAME");
                         }

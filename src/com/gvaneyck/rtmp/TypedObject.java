@@ -109,8 +109,10 @@ public class TypedObject extends HashMap<String, Object>
             return null;
         else if (val instanceof Double)
             return (Double)val;
+        else if (val instanceof String)
+            return Double.parseDouble((String) val);
         else
-            return ((Integer)val).doubleValue();
+            return ((Double)val).doubleValue();
     }
 
     /**

@@ -16,6 +16,10 @@
 
 package com.achimala.leaguelib.services;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+
 import com.achimala.leaguelib.connection.LeagueConnection;
 import com.achimala.leaguelib.errors.LeagueErrorCode;
 import com.achimala.leaguelib.errors.LeagueException;
@@ -55,6 +59,12 @@ public class GameService extends LeagueAbstractService {
         }
     }
 
+    /**
+     * Fills {@code LeagueSummoner} with active game data.
+     *
+     * @param summoner {@code LeagueSummoner} with internal name
+     * @throws LeagueException
+     */
     public void fillActiveGameData(LeagueSummoner summoner) throws LeagueException {
         TypedObject obj = call("retrieveInProgressSpectatorGameInfo", new Object[] { summoner.getInternalName() });
         createAndSetGame(summoner, obj);
@@ -71,6 +81,17 @@ public class GameService extends LeagueAbstractService {
             @Override
             public void onError(Exception ex) {
                 callback.onError(ex);
+            }
+        });
+    }
+
+    public Future<LeagueSummoner> fillActiveGameData(final LeagueSummoner summoner,
+            ExecutorService executor) {
+        return executor.submit(new Callable<LeagueSummoner>() {
+            @Override
+            public LeagueSummoner call() throws Exception {
+                fillActiveGameData(summoner);
+                return summoner;
             }
         });
     }

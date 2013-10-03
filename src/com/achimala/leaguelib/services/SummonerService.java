@@ -17,12 +17,16 @@
 package com.achimala.leaguelib.services;
 
 import java.util.Arrays;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import com.achimala.leaguelib.connection.LeagueConnection;
 import com.achimala.leaguelib.errors.LeagueErrorCode;
 import com.achimala.leaguelib.errors.LeagueException;
 import com.achimala.leaguelib.models.LeagueSummoner;
 import com.achimala.leaguelib.models.LeagueSummonerProfileInfo;
+import com.achimala.leaguelib.models.runes.RuneBook;
 import com.achimala.util.Callback;
 import com.gvaneyck.rtmp.TypedObject;
 
@@ -116,9 +120,28 @@ public class SummonerService extends LeagueAbstractService {
         });
     }
 
+    public Future<LeagueSummoner> getSummonerByName(final String name, ExecutorService executor) {
+        return executor.submit(new Callable<LeagueSummoner>() {
+            @Override
+            public LeagueSummoner call() throws Exception {
+                return getSummonerByName(name);
+            }
+        });
+    }
+
+    /**
+     * Fills {@code LeagueSummoner} with internalName, accountId, name,
+     * profileIcon, summonerId, and summonerLevel, and runes.  Also available
+     * are experience, IP, mastery points, season history, and default summoner
+     * spells per game type.
+     *
+     * @param summoner {@code LeagueSummoner} with account id
+     * @throws LeagueException
+     */
     public void fillPublicSummonerData(LeagueSummoner summoner) throws LeagueException {
         TypedObject obj = call("getAllPublicSummonerDataByAccount", new Object[] { summoner.getAccountId() });
-        summoner.setProfileInfo(new LeagueSummonerProfileInfo(obj.getTO("body").getTO("summoner")));
+        summoner.setProfileInfo(new LeagueSummonerProfileInfo(obj.getTO("body")));
+        summoner.setRuneBook(new RuneBook(obj.getTO("body")));
     }
 
     public void fillPublicSummonerData(final LeagueSummoner summoner, final Callback<LeagueSummoner> callback) {
@@ -126,7 +149,8 @@ public class SummonerService extends LeagueAbstractService {
             @Override
             public void onCompletion(TypedObject obj) {
                 try {
-                    summoner.setProfileInfo(new LeagueSummonerProfileInfo(obj.getTO("body").getTO("summoner")));
+                    summoner.setProfileInfo(new LeagueSummonerProfileInfo(obj.getTO("body")));
+                    summoner.setRuneBook(new RuneBook(obj.getTO("body")));
                     callback.onCompletion(summoner);
                 } catch(Exception ex) {
                     callback.onError(ex);
@@ -135,6 +159,17 @@ public class SummonerService extends LeagueAbstractService {
             @Override
             public void onError(Exception ex) {
                 callback.onError(ex);
+            }
+        });
+    }
+
+    public Future<LeagueSummoner> fillPublicSummonerData(final LeagueSummoner summoner,
+            ExecutorService executor) {
+        return executor.submit(new Callable<LeagueSummoner>() {
+            @Override
+            public LeagueSummoner call() throws Exception {
+                fillPublicSummonerData(summoner);
+                return summoner;
             }
         });
     }

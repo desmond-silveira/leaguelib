@@ -19,11 +19,16 @@ package com.achimala.leaguelib.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import com.achimala.leaguelib.connection.LeagueConnection;
 import com.achimala.leaguelib.errors.LeagueException;
 import com.achimala.leaguelib.models.LeagueCompetitiveSeason;
+import com.achimala.leaguelib.models.LeagueRankedStatType;
 import com.achimala.leaguelib.models.LeagueSummoner;
+import com.achimala.leaguelib.models.LeagueSummonerPlayerStats;
 import com.achimala.leaguelib.models.LeagueSummonerRankedStats;
 import com.achimala.leaguelib.models.MatchHistoryEntry;
 import com.achimala.util.Callback;
@@ -41,6 +46,41 @@ public class PlayerStatsService extends LeagueAbstractService {
         return "playerStatsService";
     }
 
+    public void fillPlayerStats(LeagueSummoner summoner) throws LeagueException {
+        TypedObject obj = call(
+                "retrievePlayerStatsByAccountId",
+                new Object[] { summoner.getAccountId(), LeagueCompetitiveSeason.CURRENT.toString() });
+        summoner.setPlayerStats(new LeagueSummonerPlayerStats(obj.getTO("body")));
+    }
+
+    public void fillPlayerStats(final LeagueSummoner summoner,
+            final Callback<LeagueSummoner> callback) {
+        callAsynchronously("retrievePlayerStatsByAccountId", new Object[] {
+                summoner.getAccountId(), LeagueCompetitiveSeason.CURRENT.toString() },
+                new Callback<TypedObject>() {
+                    public void onCompletion(TypedObject obj) {
+                        try {
+                            summoner.setPlayerStats(new LeagueSummonerPlayerStats(obj.getTO("body")));
+                            callback.onCompletion(summoner);
+                        } catch (Exception ex) {
+                            callback.onError(ex);
+                        }
+                    }
+
+                    public void onError(Exception ex) {
+                        callback.onError(ex);
+                    }
+                });
+    }
+
+    /**
+     * Fills {@code LeagueSummoner} with ranked game statistics grouped by
+     * champion.
+     *
+     * @param summoner
+     * @throws LeagueException
+     * @see {@link LeagueRankedStatType}
+     */
     public void fillRankedStats(LeagueSummoner summoner) throws LeagueException {
         TypedObject obj = call("getAggregatedStats", new Object[] { summoner.getAccountId(), SUMMONERS_RIFT, LeagueCompetitiveSeason.CURRENT.toString() });
         summoner.setRankedStats(new LeagueSummonerRankedStats(obj.getTO("body")));
@@ -61,6 +101,17 @@ public class PlayerStatsService extends LeagueAbstractService {
             @Override
             public void onError(Exception ex) {
                 callback.onError(ex);
+            }
+        });
+    }
+
+    public Future<LeagueSummoner> fillRankedStats(final LeagueSummoner summoner,
+            ExecutorService executor) {
+        return executor.submit(new Callable<LeagueSummoner>() {
+            @Override
+            public LeagueSummoner call() throws Exception {
+                fillRankedStats(summoner);
+                return summoner;
             }
         });
     }
@@ -96,6 +147,17 @@ public class PlayerStatsService extends LeagueAbstractService {
             @Override
             public void onError(Exception ex) {
                 callback.onError(ex);
+            }
+        });
+    }
+
+    public Future<LeagueSummoner> fillMatchHistroy(final LeagueSummoner summoner,
+            ExecutorService executor) {
+        return executor.submit(new Callable<LeagueSummoner>() {
+            @Override
+            public LeagueSummoner call() throws Exception {
+                fillMatchHistory(summoner);
+                return summoner;
             }
         });
     }

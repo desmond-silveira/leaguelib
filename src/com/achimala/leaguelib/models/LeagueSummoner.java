@@ -17,7 +17,10 @@
 package com.achimala.leaguelib.models;
 
 import com.achimala.leaguelib.connection.LeagueServer;
+import com.achimala.leaguelib.models.masteries.MasteryBook;
+import com.achimala.leaguelib.models.runes.RuneBook;
 import com.gvaneyck.rtmp.TypedObject;
+
 import java.util.List;
 import java.util.Comparator;
 import java.util.Collections;
@@ -31,8 +34,14 @@ public class LeagueSummoner {
     LeagueSummonerProfileInfo _profileInfo;
     LeagueSummonerLeagueStats _leagueStats;
     LeagueSummonerRankedStats _rankedStats;
+    LeagueSummonerPlayerStats _playerStats;
     List<MatchHistoryEntry> _matchHistory;
+    MasteryBook _masteryBook;
+    RuneBook _runeBook;
     LeagueGame _activeGame;
+    SummonerSpell _summonerSpell1,_summonerSpell2;
+    private int _lastSelectedSkin = 0;
+    double _teamParticipantId;
 
     public LeagueSummoner() {
         _profileInfo = new LeagueSummonerProfileInfo();
@@ -53,8 +62,10 @@ public class LeagueSummoner {
     // But when it's returned via summonerService it's called acctId
     public LeagueSummoner(TypedObject obj, LeagueServer server, boolean isGamePlayer) {
         this();
-        if(isGamePlayer)
+        if(isGamePlayer) {
             _isBot = obj.type.equals("com.riotgames.platform.game.BotParticipant");
+            this.setTeamParticipantId(obj.getDouble("teamParticipantId"));
+        }
         _name = obj.getString(isGamePlayer ? "summonerName" : "name");
         _internalName = obj.getString(isGamePlayer ? "summonerInternalName" : "internalName");
         if(!_isBot) {
@@ -75,6 +86,12 @@ public class LeagueSummoner {
         _accountId = id;
     }
 
+    public void setTeamParticipantId(Double id) {
+        if (id == null) {
+            id = -1.0;
+        }
+        _teamParticipantId = id;
+    }
     public void setName(String name) {
         _name = name;
     }
@@ -101,6 +118,10 @@ public class LeagueSummoner {
 
     public void setRankedStats(LeagueSummonerRankedStats stats) {
         _rankedStats = stats;
+    }
+
+    public void setPlayerStats(LeagueSummonerPlayerStats stats) {
+        _playerStats = stats;
     }
 
     public void setMatchHistory(List<MatchHistoryEntry> matchHistory) {
@@ -133,6 +154,10 @@ public class LeagueSummoner {
         return _accountId;
     }
 
+    public double getTeamParticipantId() {
+        return _teamParticipantId;
+    }
+
     public String getName() {
         return _name;
     }
@@ -159,6 +184,10 @@ public class LeagueSummoner {
 
     public LeagueSummonerRankedStats getRankedStats() {
         return _rankedStats;
+    }
+
+    public LeagueSummonerPlayerStats getPlayerStats() {
+        return _playerStats;
     }
 
     public List<MatchHistoryEntry> getMatchHistory() {
@@ -190,5 +219,42 @@ public class LeagueSummoner {
 
     public boolean isEqual(Object other) {
         return (other instanceof LeagueSummoner && ((LeagueSummoner)other).getId() == _id);
+    }
+
+    public void setMasteryBook(MasteryBook book) {
+        _masteryBook = book;
+    }
+
+    public MasteryBook getMasteryBook() {
+        return _masteryBook;
+    }
+
+    public void setRuneBook(RuneBook book) {
+        _runeBook = book;
+    }
+
+    public RuneBook getRuneBook() {
+        return _runeBook;
+    }
+
+    public void setSummonerSpells(SummonerSpell s1, SummonerSpell s2) {
+        _summonerSpell1 = s1;
+        _summonerSpell2 = s2;
+    }
+
+    public SummonerSpell getSummonerSpell1() {
+        return _summonerSpell1;
+    }
+
+    public SummonerSpell getSummonerSpell2() {
+        return _summonerSpell2;
+    }
+
+    public void setLastSelectedSkin(int skin) {
+        _lastSelectedSkin = skin;
+    }
+
+    public int getLastSelectedSkin() {
+        return _lastSelectedSkin;
     }
 }

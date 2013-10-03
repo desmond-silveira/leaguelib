@@ -16,6 +16,10 @@
 
 package com.achimala.leaguelib.services;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+
 import com.achimala.leaguelib.connection.LeagueConnection;
 import com.achimala.leaguelib.errors.LeagueException;
 import com.achimala.leaguelib.models.LeagueMatchmakingQueue;
@@ -48,6 +52,12 @@ public class LeaguesService extends LeagueAbstractService {
     //     return super.handleResult(result);
     // }
 
+    /**
+     * Fills {@code LeagueSummoner} with Ranked Solo 5x5 league data.
+     *
+     * @param summoner {@code LeagueSummoner} with summoner id
+     * @throws LeagueException
+     */
     public void fillSoloQueueLeagueData(LeagueSummoner summoner) throws LeagueException {
         TypedObject obj = call("getLeagueForPlayer", new Object[] { summoner.getId(), LeagueMatchmakingQueue.RANKED_SOLO_5x5.toString() });
         if(obj == null || obj.getTO("body") == null) {
@@ -74,6 +84,17 @@ public class LeaguesService extends LeagueAbstractService {
             @Override
             public void onError(Exception ex) {
                 callback.onError(ex);
+            }
+        });
+    }
+
+    public Future<LeagueSummoner> fillSoloQueueLeagueData(final LeagueSummoner summoner,
+            ExecutorService executor) {
+        return executor.submit(new Callable<LeagueSummoner>() {
+            @Override
+            public LeagueSummoner call() throws Exception {
+                fillSoloQueueLeagueData(summoner);
+                return summoner;
             }
         });
     }

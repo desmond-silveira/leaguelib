@@ -155,6 +155,11 @@ public class LoLRTMPSClient extends RTMPSClient
             this.server = "prod.tr.lol.riotgames.com";
             this.loginQueue = "https://lq.tr.lol.riotgames.com/";
         }
+        else if (region.equals("RU"))
+        {
+            this.server = "prod.ru.lol.riotgames.com";
+            this.loginQueue = "https://lq.ru.lol.riotgames.com/";
+        }
         else if (region.equals("PBE"))
         {
             this.server = "prod.pbe1.lol.riotgames.com";
