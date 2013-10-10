@@ -24,24 +24,26 @@ import com.gvaneyck.rtmp.TypedObject;
 import java.util.List;
 import java.util.Comparator;
 import java.util.Collections;
+import java.util.Map;
 
 public class LeagueSummoner {
     private int _id=-1, _accountId=-1;
     private int _profileIconId=0, _level=0;
     private String _name, _internalName;
     private boolean _isBot = false;
-    LeagueServer _server;
-    LeagueSummonerProfileInfo _profileInfo;
-    LeagueSummonerLeagueStats _leagueStats;
-    LeagueSummonerRankedStats _rankedStats;
-    LeagueSummonerPlayerStats _playerStats;
-    List<MatchHistoryEntry> _matchHistory;
-    MasteryBook _masteryBook;
-    RuneBook _runeBook;
-    LeagueGame _activeGame;
-    SummonerSpell _summonerSpell1,_summonerSpell2;
+    private LeagueServer _server;
+    private LeagueSummonerProfileInfo _profileInfo;
+    private LeagueSummonerLeagueStats _leagueStats;
+    private LeagueSummonerRankedStats _rankedStats;
+    private LeagueSummonerPlayerStats _playerStats;
+    private List<MatchHistoryEntry> _matchHistory;
+    private MasteryBook _masteryBook;
+    private RuneBook _runeBook;
+    private LeagueGame _activeGame;
+    private SummonerSpell _summonerSpell1,_summonerSpell2;
     private int _lastSelectedSkin = 0;
-    double _teamParticipantId;
+    private double _teamParticipantId;
+    private Map<LeagueHonorType, Integer> _honorValues;
 
     public LeagueSummoner() {
         _profileInfo = new LeagueSummonerProfileInfo();
@@ -256,5 +258,13 @@ public class LeagueSummoner {
 
     public int getLastSelectedSkin() {
         return _lastSelectedSkin;
+    }
+
+    public Map<LeagueHonorType, Integer> getHonorValues() {
+        return _honorValues;
+    }
+
+    public void setHonorValues(Map<LeagueHonorType, Integer> _honorValues) {
+        this._honorValues = _honorValues;
     }
 }

@@ -18,6 +18,7 @@ package com.achimala.leaguelib.connection;
 
 import com.achimala.leaguelib.errors.LeagueErrorCode;
 import com.achimala.leaguelib.errors.LeagueException;
+import com.achimala.leaguelib.services.ClientFacadeService;
 import com.achimala.leaguelib.services.GameService;
 import com.achimala.leaguelib.services.LeaguesService;
 import com.achimala.leaguelib.services.MasteryService;
@@ -32,6 +33,7 @@ public class LeagueConnection {
     private PlayerStatsService _playerStatsService;
     private GameService _gameService;
     private MasteryService _masteryService;
+    private ClientFacadeService _clientFacadeService;
     private LeagueServer _server;
 
     private LeagueAccountQueue _accountQueue;
@@ -149,5 +151,16 @@ public class LeagueConnection {
         if (_masteryService == null)
             _masteryService = new MasteryService(this);
         return _masteryService;
+    }
+
+    /**
+     * Represents to the `clientFacadeService` on the League of Legends RTMP API.
+     * This service is actually only used to know the honor points of a LeagueSummoner.
+     */
+    public ClientFacadeService getClientFacadeService() {
+        if (_clientFacadeService == null) {
+            _clientFacadeService = new ClientFacadeService(this);
+        }
+        return _clientFacadeService;
     }
 }
