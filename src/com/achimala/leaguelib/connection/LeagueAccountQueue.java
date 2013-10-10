@@ -81,6 +81,12 @@ public class LeagueAccountQueue {
         return exceptions.size() > 0 ? exceptions : null;
     }
 
+    public synchronized void closeAll() {
+        for (LeagueAccount account : _internalQueue) {
+            account.close();
+        }
+    }
+
     /**
      * Returns true iff there exists an account that is connected.
      */
