@@ -21,28 +21,32 @@ public enum LeagueErrorCode {
     UNSUPPORTED_SERVER,
     NETWORK_ERROR,
     RTMP_ERROR,
-    AUTHENTICATION_ERROR,
+    AUTHENTICATION_ERROR("org.springframework.security.authentication.AuthenticationCredentialsNotFoundException"),
     SUMMONER_NOT_FOUND,
     SUMMONER_NOT_IN_LEAGUE,
     ACTIVE_GAME_NOT_FOUND("com.riotgames.platform.game.GameNotFoundException"),
     ACTIVE_GAME_NOT_SPECTATABLE("com.riotgames.platform.game.GameObserverModeNotEnabledException");
-    
+
     private String _exceptionString;
-    
+
     private LeagueErrorCode() { }
-    
+
     private LeagueErrorCode(String exceptionString) {
         _exceptionString = exceptionString;
     }
-    
+
     public String getExceptionString() {
         return _exceptionString;
     }
-    
+
     public static LeagueErrorCode getErrorCodeForException(String exceptionString) {
-        for(LeagueErrorCode code : LeagueErrorCode.values())
-            if(code.getExceptionString() != null && code.getExceptionString().equals(exceptionString))
-                return code;
+        if (exceptionString != null) {
+            for (LeagueErrorCode code : LeagueErrorCode.values()) {
+                if (exceptionString.equals(code.getExceptionString())) {
+                    return code;
+                }
+            }
+        }
         return RTMP_ERROR;
     }
 }
