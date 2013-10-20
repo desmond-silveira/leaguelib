@@ -68,6 +68,9 @@ public enum LeagueServer {
     }
 
     public static LeagueServer fromString(String str) {
+        if (str == null) {
+            return null;
+        }
         return stringToEnum.get(str.toUpperCase());
     }
 }
