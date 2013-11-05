@@ -26,6 +26,7 @@ import com.achimala.leaguelib.errors.LeagueErrorCode;
 import com.achimala.leaguelib.errors.LeagueException;
 import com.achimala.leaguelib.models.LeagueSummoner;
 import com.achimala.leaguelib.models.LeagueSummonerProfileInfo;
+import com.achimala.leaguelib.models.SummonerSpell;
 import com.achimala.leaguelib.models.runes.RuneBook;
 import com.achimala.util.Callback;
 import com.gvaneyck.rtmp.TypedObject;
@@ -142,6 +143,12 @@ public class SummonerService extends LeagueAbstractService {
         TypedObject obj = call("getAllPublicSummonerDataByAccount", new Object[] { summoner.getAccountId() });
         summoner.setProfileInfo(new LeagueSummonerProfileInfo(obj.getTO("body")));
         summoner.setRuneBook(new RuneBook(obj.getTO("body")));
+        TypedObject summonerSpells = obj.getTO("body")
+                .getTO("summonerDefaultSpells").getTO("summonerDefaultSpellMap")
+                .getTO("CLASSIC");
+        summoner.setSummonerSpells(
+                SummonerSpell.getSpellById(summonerSpells.getInt("spell1Id")),
+                SummonerSpell.getSpellById(summonerSpells.getInt("spell2Id")));
     }
 
     public void fillPublicSummonerData(final LeagueSummoner summoner, final Callback<LeagueSummoner> callback) {
@@ -151,6 +158,12 @@ public class SummonerService extends LeagueAbstractService {
                 try {
                     summoner.setProfileInfo(new LeagueSummonerProfileInfo(obj.getTO("body")));
                     summoner.setRuneBook(new RuneBook(obj.getTO("body")));
+                    TypedObject summonerSpells = obj.getTO("body")
+                            .getTO("summonerDefaultSpells").getTO("summonerDefaultSpellMap")
+                            .getTO("CLASSIC");
+                    summoner.setSummonerSpells(
+                            SummonerSpell.getSpellById(summonerSpells.getInt("spell1Id")),
+                            SummonerSpell.getSpellById(summonerSpells.getInt("spell2Id")));
                     callback.onCompletion(summoner);
                 } catch(Exception ex) {
                     callback.onError(ex);
