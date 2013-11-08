@@ -738,7 +738,7 @@ public class LoLRTMPSClient extends RTMPSClient
      */
     class HeartbeatThread
     {
-        private Thread curThread;
+        private static volatile Thread curThread;
         private int heartbeat;
         private SimpleDateFormat sdf = new SimpleDateFormat("ddd MMM d yyyy HH:mm:ss 'GMTZ'");
 
