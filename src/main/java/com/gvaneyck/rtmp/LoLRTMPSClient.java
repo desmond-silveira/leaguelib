@@ -733,12 +733,13 @@ public class LoLRTMPSClient extends RTMPSClient
         return total;
     }
 
+    private static volatile Thread curThread;
+
     /**
      * Executes a LCDSHeartBeat every 2 minutes
      */
     class HeartbeatThread
     {
-        private static volatile Thread curThread;
         private int heartbeat;
         private SimpleDateFormat sdf = new SimpleDateFormat("ddd MMM d yyyy HH:mm:ss 'GMTZ'");
 
