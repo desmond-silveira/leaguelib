@@ -141,14 +141,15 @@ public class SummonerService extends LeagueAbstractService {
      */
     public void fillPublicSummonerData(LeagueSummoner summoner) throws LeagueException {
         TypedObject obj = call("getAllPublicSummonerDataByAccount", new Object[] { summoner.getAccountId() });
-        summoner.setProfileInfo(new LeagueSummonerProfileInfo(obj.getTO("body")));
-        summoner.setRuneBook(new RuneBook(obj.getTO("body")));
-        TypedObject summonerSpells = obj.getTO("body")
-                .getTO("summonerDefaultSpells").getTO("summonerDefaultSpellMap")
-                .getTO("CLASSIC");
+        TypedObject body = obj.getTO("body");
+        summoner.setProfileInfo(new LeagueSummonerProfileInfo(body));
+        summoner.setRuneBook(new RuneBook(body));
+        TypedObject summonerSpells = body.getTO("summonerDefaultSpells")
+                .getTO("summonerDefaultSpellMap").getTO("CLASSIC");
         summoner.setSummonerSpells(
                 SummonerSpell.getSpellById(summonerSpells.getInt("spell1Id")),
                 SummonerSpell.getSpellById(summonerSpells.getInt("spell2Id")));
+        summoner.setLevel(body.getTO("summonerLevel").getInt("summonerLevel"));
     }
 
     public void fillPublicSummonerData(final LeagueSummoner summoner, final Callback<LeagueSummoner> callback) {
@@ -156,14 +157,15 @@ public class SummonerService extends LeagueAbstractService {
             @Override
             public void onCompletion(TypedObject obj) {
                 try {
-                    summoner.setProfileInfo(new LeagueSummonerProfileInfo(obj.getTO("body")));
-                    summoner.setRuneBook(new RuneBook(obj.getTO("body")));
-                    TypedObject summonerSpells = obj.getTO("body")
-                            .getTO("summonerDefaultSpells").getTO("summonerDefaultSpellMap")
-                            .getTO("CLASSIC");
+                    TypedObject body = obj.getTO("body");
+                    summoner.setProfileInfo(new LeagueSummonerProfileInfo(body));
+                    summoner.setRuneBook(new RuneBook(body));
+                    TypedObject summonerSpells = body.getTO("summonerDefaultSpells")
+                            .getTO("summonerDefaultSpellMap").getTO("CLASSIC");
                     summoner.setSummonerSpells(
                             SummonerSpell.getSpellById(summonerSpells.getInt("spell1Id")),
                             SummonerSpell.getSpellById(summonerSpells.getInt("spell2Id")));
+                    summoner.setLevel(body.getTO("summonerLevel").getInt("summonerLevel"));
                     callback.onCompletion(summoner);
                 } catch(Exception ex) {
                     callback.onError(ex);
