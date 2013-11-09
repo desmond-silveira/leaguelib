@@ -71,7 +71,7 @@
     </target>
 
     <target name="run-test" depends="jar">
-        <java classname="${package-prefix}.tests.MainTest">
+        <java classname="${package-prefix}.MainTest">
             <classpath>
                 <pathelement location="${jar.dir}/${ant.project.name}.jar" />
             </classpath>
@@ -80,7 +80,7 @@
     </target>
     
     <target name="run-test-console" depends="jar">
-        <java classname="${package-prefix}.tests.TestConsole">
+        <java classname="${package-prefix}.TestConsole">
             <classpath>
                 <pathelement location="${jar.dir}/${ant.project.name}.jar" />
             </classpath>
