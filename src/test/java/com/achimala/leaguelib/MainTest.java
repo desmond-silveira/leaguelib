@@ -61,7 +61,7 @@ public class MainTest {
     public static void main(String[] args) throws Exception {
         final LeagueConnection c = new LeagueConnection(LeagueServer.NORTH_AMERICA);
         c.getAccountQueue().addAccount(new LeagueAccount(
-                LeagueServer.NORTH_AMERICA, "3.13.xx", "statstrats", args[0]));
+                LeagueServer.NORTH_AMERICA, "3.14.xx", "statstrats", args[0]));
         final String SUMMONER_TO_LOOK_UP = "rf legendary";
 
         Map<LeagueAccount, LeagueException> exceptions = c.getAccountQueue().connectAll();
