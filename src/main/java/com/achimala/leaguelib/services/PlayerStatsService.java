@@ -25,7 +25,6 @@ import java.util.concurrent.Future;
 
 import com.achimala.leaguelib.connection.LeagueConnection;
 import com.achimala.leaguelib.errors.LeagueException;
-import com.achimala.leaguelib.models.LeagueCompetitiveSeason;
 import com.achimala.leaguelib.models.LeagueRankedStatType;
 import com.achimala.leaguelib.models.LeagueSummoner;
 import com.achimala.leaguelib.models.LeagueSummonerPlayerStats;
