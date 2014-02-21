@@ -49,7 +49,11 @@ public class MatchHistoryEntry implements PlayerList {
         _summonerSpell1 = obj.getInt("spell1");
         _summonerSpell2 = obj.getInt("spell2");
         _createDate = (Date)obj.get("createDate");
-        _queue = LeagueMatchmakingQueue.valueOf(obj.getString("queueType"));
+        try {
+            _queue = LeagueMatchmakingQueue.valueOf(obj.getString("queueType"));
+        } catch (IllegalArgumentException e) {
+            
+        }
 
         _playerTeam = new ArrayList<LeagueSummoner>();
         _enemyTeam = new ArrayList<LeagueSummoner>();

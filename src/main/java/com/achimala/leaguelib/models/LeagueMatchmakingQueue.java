@@ -27,5 +27,8 @@ public enum LeagueMatchmakingQueue {
     RANKED_TEAM_3x3,
     RANKED_TEAM_5x5,
     ARAM_UNRANKED_5x5,
-    ONEFORALL_5x5
+    ONEFORALL_5x5,
+    FIRSTBLOOD_1x1,
+    FIRSTBLOOD_2x2,
+    SR_6x6
 }
