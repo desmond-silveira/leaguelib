@@ -30,5 +30,6 @@ public enum LeagueMatchmakingQueue {
     ONEFORALL_5x5,
     FIRSTBLOOD_1x1,
     FIRSTBLOOD_2x2,
-    SR_6x6
+    SR_6x6,
+    CAP_5x5
 }
