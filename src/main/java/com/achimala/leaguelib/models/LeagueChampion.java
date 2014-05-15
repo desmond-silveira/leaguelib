@@ -82,6 +82,7 @@ public class LeagueChampion {
         _modelMap.put( 57, "Maokai");
         _modelMap.put( 58, "Renekton");
         _modelMap.put( 59, "Jarvan IV");
+        _modelMap.put( 60, "Elise");
         _modelMap.put( 61, "Orianna");
         _modelMap.put( 62, "Wukong");
         _modelMap.put( 63, "Brand");
@@ -116,6 +117,7 @@ public class LeagueChampion {
         _modelMap.put(104, "Graves");
         _modelMap.put(105, "Fizz");
         _modelMap.put(106, "Volibear");
+        _modelMap.put(107, "Rengar");
         _modelMap.put(110, "Varus");
         _modelMap.put(111, "Nautilus");
         _modelMap.put(112, "Viktor");
@@ -125,26 +127,25 @@ public class LeagueChampion {
         _modelMap.put(117, "Lulu");
         _modelMap.put(119, "Draven");
         _modelMap.put(120, "Hecarim");
+        _modelMap.put(121, "Kha'Zix");
         _modelMap.put(122, "Darius");
         _modelMap.put(126, "Jayce");
-        _modelMap.put(143, "Zyra");
-        _modelMap.put(131, "Diana");
-        _modelMap.put(107, "Rengar");
-        _modelMap.put(134, "Syndra");
-        _modelMap.put(121, "Kha'Zix");
-        _modelMap.put( 60, "Elise");
-        _modelMap.put(238, "Zed");
-        _modelMap.put(267, "Nami");
-        _modelMap.put(254, "Vi");
-        _modelMap.put(412, "Thresh");
-        _modelMap.put(133, "Quinn");
-        _modelMap.put(154, "Zac");
         _modelMap.put(127, "Lissandra");
-        _modelMap.put(266, "Aatrox");
-        _modelMap.put(236, "Lucian");
-        _modelMap.put(222, "Jinx");
+        _modelMap.put(131, "Diana");
+        _modelMap.put(133, "Quinn");
+        _modelMap.put(134, "Syndra");
+        _modelMap.put(143, "Zyra");
+        _modelMap.put(154, "Zac");
         _modelMap.put(157, "Yasuo");
         _modelMap.put(161, "Vel'Koz");
+        _modelMap.put(201, "Braum");
+        _modelMap.put(222, "Jinx");
+        _modelMap.put(236, "Lucian");
+        _modelMap.put(238, "Zed");
+        _modelMap.put(254, "Vi");
+        _modelMap.put(266, "Aatrox");
+        _modelMap.put(267, "Nami");
+        _modelMap.put(412, "Thresh");
 
         _champMap = new HashMap<Integer, LeagueChampion>();
     }
