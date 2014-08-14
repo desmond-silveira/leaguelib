@@ -135,6 +135,7 @@ public class LeagueChampion {
         _modelMap.put(133, "Quinn");
         _modelMap.put(134, "Syndra");
         _modelMap.put(143, "Zyra");
+        _modelMap.put(150, "Gnar");
         _modelMap.put(154, "Zac");
         _modelMap.put(157, "Yasuo");
         _modelMap.put(161, "Vel'Koz");
