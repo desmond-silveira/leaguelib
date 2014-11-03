@@ -60,5 +60,7 @@ public enum LeagueMatchmakingQueue {
     /** Summoner's Rift games played against Nightmare AI. */
     NIGHTMARE_BOT,
     /** Ascension games. */
-    ASCENSION
+    ASCENSION,
+    /** Twisted Treeline 6x6 Hexakill games. */
+    HEXAKILL
 }
