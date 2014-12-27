@@ -11,3 +11,7 @@ src/com/gvaneyck/util
 *.MF
 test-console.sh
 /target
+
+*.iml
+*.ipr
+*.iws
