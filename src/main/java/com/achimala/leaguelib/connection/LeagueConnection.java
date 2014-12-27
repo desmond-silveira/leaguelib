@@ -25,6 +25,7 @@ import com.achimala.leaguelib.services.MasteryService;
 import com.achimala.leaguelib.services.PlayerStatsService;
 import com.achimala.leaguelib.services.SummonerService;
 import com.achimala.util.Callback;
+import com.gvaneyck.rtmp.ServerInfo;
 import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public class LeagueConnection {
@@ -34,7 +35,7 @@ public class LeagueConnection {
     private GameService _gameService;
     private MasteryService _masteryService;
     private ClientFacadeService _clientFacadeService;
-    private LeagueServer _server;
+    private ServerInfo _server;
 
     private LeagueAccountQueue _accountQueue;
 
@@ -42,7 +43,7 @@ public class LeagueConnection {
         this(null);
     }
 
-    public LeagueConnection(LeagueServer server) {
+    public LeagueConnection(ServerInfo server) {
         _server = server;
         _accountQueue = new LeagueAccountQueue();
     }
@@ -56,7 +57,7 @@ public class LeagueConnection {
         _accountQueue = queue;
     }
 
-    public void setServer(LeagueServer server) {
+    public void setServer(ServerInfo server) {
         _server = server;
     }
 
@@ -64,7 +65,7 @@ public class LeagueConnection {
         return _accountQueue;
     }
 
-    public LeagueServer getServer() {
+    public ServerInfo getServer() {
         return _server;
     }
 

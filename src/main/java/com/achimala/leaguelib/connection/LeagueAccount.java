@@ -16,23 +16,24 @@
 
 package com.achimala.leaguelib.connection;
 
-import java.io.IOException;
-
 import com.achimala.leaguelib.errors.LeagueErrorCode;
 import com.achimala.leaguelib.errors.LeagueException;
 import com.achimala.util.Callback;
 import com.gvaneyck.rtmp.LoLRTMPSClient;
+import com.gvaneyck.rtmp.ServerInfo;
 import com.gvaneyck.rtmp.encoding.TypedObject;
 
+import java.io.IOException;
+
 public class LeagueAccount {
-    private LeagueServer _server;
+    private ServerInfo _server;
     private String _clientVersion, _username, _password;
     LoLRTMPSClient _internalClient;
 
     /**
      * Creates a LeagueAccount, which is used to authenticate API calls to the League of Legends RTMP API.
      */
-    public LeagueAccount(LeagueServer server, String clientVersion, String username, String password) {
+    public LeagueAccount(ServerInfo server, String clientVersion, String username, String password) {
         _server = server;
         _clientVersion = clientVersion;
         _username = username;
@@ -43,7 +44,7 @@ public class LeagueAccount {
         if(_server == null || _clientVersion == null || _username == null || _password == null || _username.length() <= 0 || _password.length() <= 0)
             throw new LeagueException(LeagueErrorCode.AUTHENTICATION_ERROR, "Missing credentials");
         if(_internalClient == null)
-            _internalClient = new LoLRTMPSClient(_server.getServerCode(), _clientVersion, _username, _password);
+            _internalClient = new LoLRTMPSClient(_server, _clientVersion, _username, _password);
     }
 
     /**
@@ -112,7 +113,7 @@ public class LeagueAccount {
     public void invokeWithCallback(String service, String method, Object arguments, final Callback<TypedObject> callback) {
         try {
             // System.out.println(_username + " performing " + method + " in " + service);
-            _internalClient.invokeWithCallback(service, method, arguments, new com.gvaneyck.rtmp.Callback() {
+            _internalClient.invokeWithCallback(service, method, arguments, new com.gvaneyck.rtmp.RTMPCallback() {
                 @Override
                 public void callback(TypedObject result) {
                     callback.onCompletion(result);
@@ -123,7 +124,7 @@ public class LeagueAccount {
         }
     }
 
-    public void setServer(LeagueServer server) {
+    public void setServer(ServerInfo server) {
         _server = server;
     }
 
@@ -139,7 +140,7 @@ public class LeagueAccount {
         _password = password;
     }
 
-    public LeagueServer getServer() {
+    public ServerInfo getServer() {
         return _server;
     }
 
@@ -157,7 +158,7 @@ public class LeagueAccount {
 
     @Override
     public String toString() {
-        return String.format("<LeagueAccount: %s on %s>", _username, _server.getServerCode());
+        return String.format("<LeagueAccount: %s on %s>", _username, _server.name);
     }
 
     @Override
