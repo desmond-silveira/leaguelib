@@ -18,22 +18,50 @@ package com.achimala.leaguelib;
 
 // import com.achimala.leaguelib.connection.*;
 // import com.achimala.leaguelib.models.*;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 
 import com.google.gson.Gson;
 import com.gvaneyck.rtmp.LoLRTMPSClient;
+import com.gvaneyck.rtmp.ServerInfo;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestConsole {
     @SuppressWarnings("unchecked")
+
+    static final Map<String, ServerInfo> VALUES_BY_NAME;
+    static {
+        final Map<String, ServerInfo> valuesByName = new HashMap<>();
+        valuesByName.put("na", ServerInfo.NA);
+        valuesByName.put("euw", ServerInfo.EUW);
+        valuesByName.put("eune", ServerInfo.EUNE);
+        valuesByName.put("br", ServerInfo.BR);
+        valuesByName.put("tr", ServerInfo.TR);
+        valuesByName.put("ru", ServerInfo.RU);
+        valuesByName.put("lan", ServerInfo.LAN);
+        valuesByName.put("las", ServerInfo.LAS);
+        valuesByName.put("oce", ServerInfo.OCE);
+        valuesByName.put("pbe", ServerInfo.PBE);
+        valuesByName.put("sg", ServerInfo.SG);
+        valuesByName.put("tw", ServerInfo.TW);
+        valuesByName.put("th", ServerInfo.TH);
+        valuesByName.put("ph", ServerInfo.PH);
+        valuesByName.put("vn", ServerInfo.VN);
+        VALUES_BY_NAME = Collections.unmodifiableMap(valuesByName);
+    }
+
     public static void main(String[] args) throws Exception {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-        String username, password, client, server;
+        String username, password, client;
         username = args[0];
         password = args[1];
-        server = args[2];
+
+        ServerInfo server = VALUES_BY_NAME.get(args[2]);
         client = args[3];
 
         System.out.println("Logging into " + server + " as " + username);
