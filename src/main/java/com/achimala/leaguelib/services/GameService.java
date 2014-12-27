@@ -16,10 +16,6 @@
 
 package com.achimala.leaguelib.services;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-
 import com.achimala.leaguelib.connection.LeagueConnection;
 import com.achimala.leaguelib.errors.LeagueErrorCode;
 import com.achimala.leaguelib.errors.LeagueException;
@@ -27,6 +23,10 @@ import com.achimala.leaguelib.models.LeagueGame;
 import com.achimala.leaguelib.models.LeagueSummoner;
 import com.achimala.util.Callback;
 import com.gvaneyck.rtmp.encoding.TypedObject;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 public class GameService extends LeagueAbstractService {
     public GameService(LeagueConnection connection) {
@@ -42,7 +42,7 @@ public class GameService extends LeagueAbstractService {
     @Override
     protected TypedObject handleResult(TypedObject result) throws LeagueException {
         if(result.get("result").equals("_error")) {
-            String reason = result.getExceptionMessage();
+            String reason = result.toPrettyString();
             LeagueErrorCode code = LeagueErrorCode.getErrorCodeForException(reason);
             if(code == LeagueErrorCode.ACTIVE_GAME_NOT_FOUND || code == LeagueErrorCode.ACTIVE_GAME_NOT_SPECTATABLE)
                 return null;

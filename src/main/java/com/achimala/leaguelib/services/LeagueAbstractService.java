@@ -36,7 +36,7 @@ public abstract class LeagueAbstractService {
     protected TypedObject handleResult(TypedObject result) throws LeagueException {
         if(result.get("result").equals("_error")) {
             System.err.println(result);
-            String reason = result.getExceptionMessage();
+            String reason = result.toPrettyString();
             throw new LeagueException(LeagueErrorCode.getErrorCodeForException(reason), reason);
         }
         return result.getTO("data");
