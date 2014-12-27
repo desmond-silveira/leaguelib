@@ -19,7 +19,7 @@ package com.achimala.leaguelib.models;
 import com.achimala.leaguelib.connection.LeagueServer;
 import com.achimala.leaguelib.models.masteries.MasteryBook;
 import com.achimala.leaguelib.models.runes.RuneBook;
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 import java.util.List;
 import java.util.Comparator;

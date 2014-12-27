@@ -20,7 +20,7 @@ import com.achimala.leaguelib.connection.LeagueConnection;
 import com.achimala.leaguelib.errors.LeagueErrorCode;
 import com.achimala.leaguelib.errors.LeagueException;
 import com.achimala.util.Callback;
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public abstract class LeagueAbstractService {
     protected LeagueConnection _connection = null;

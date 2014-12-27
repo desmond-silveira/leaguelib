@@ -22,7 +22,7 @@ import com.achimala.leaguelib.errors.LeagueErrorCode;
 import com.achimala.leaguelib.errors.LeagueException;
 import com.achimala.util.Callback;
 import com.gvaneyck.rtmp.LoLRTMPSClient;
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public class LeagueAccount {
     private LeagueServer _server;

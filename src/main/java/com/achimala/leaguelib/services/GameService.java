@@ -26,7 +26,7 @@ import com.achimala.leaguelib.errors.LeagueException;
 import com.achimala.leaguelib.models.LeagueGame;
 import com.achimala.leaguelib.models.LeagueSummoner;
 import com.achimala.util.Callback;
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public class GameService extends LeagueAbstractService {
     public GameService(LeagueConnection connection) {

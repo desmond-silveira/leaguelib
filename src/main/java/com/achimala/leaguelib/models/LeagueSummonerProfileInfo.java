@@ -16,7 +16,7 @@
 
 package com.achimala.leaguelib.models;
 
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public class LeagueSummonerProfileInfo {
     private LeagueRankedTier _seasonOneTier = LeagueRankedTier.UNRANKED;

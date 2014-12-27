@@ -5,7 +5,7 @@ import com.achimala.leaguelib.errors.LeagueException;
 import com.achimala.leaguelib.models.LeagueSummoner;
 import com.achimala.leaguelib.models.masteries.MasteryBook;
 import com.achimala.util.Callback;
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 /**
  * This service is an addition to the existing services provided by leage lib.

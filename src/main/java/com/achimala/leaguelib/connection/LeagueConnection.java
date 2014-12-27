@@ -25,7 +25,7 @@ import com.achimala.leaguelib.services.MasteryService;
 import com.achimala.leaguelib.services.PlayerStatsService;
 import com.achimala.leaguelib.services.SummonerService;
 import com.achimala.util.Callback;
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public class LeagueConnection {
     private SummonerService _summonerService;
