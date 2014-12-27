@@ -57,7 +57,7 @@ public class MainTest {
     public static void main(String[] args) throws Exception {
         final LeagueConnection c = new LeagueConnection(ServerInfo.EUW);
         c.getAccountQueue().addAccount(new LeagueAccount(
-                ServerInfo.EUW, "3.14.xx", "Noobie3110", args[0]));
+                ServerInfo.EUW, "4.21.14", "Noobie3110", args[0]));
         final String SUMMONER_TO_LOOK_UP = "Noobie3110";
 
         Map<LeagueAccount, LeagueException> exceptions = c.getAccountQueue().connectAll();
