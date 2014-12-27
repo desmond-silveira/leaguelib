@@ -55,10 +55,10 @@ public class MainTest {
     }
 
     public static void main(String[] args) throws Exception {
-        final LeagueConnection c = new LeagueConnection(ServerInfo.NA);
+        final LeagueConnection c = new LeagueConnection(ServerInfo.EUW);
         c.getAccountQueue().addAccount(new LeagueAccount(
-                ServerInfo.NA, "3.14.xx", "statstrats", args[0]));
-        final String SUMMONER_TO_LOOK_UP = "rf legendary";
+                ServerInfo.EUW, "3.14.xx", "Noobie3110", args[0]));
+        final String SUMMONER_TO_LOOK_UP = "Noobie3110";
 
         Map<LeagueAccount, LeagueException> exceptions = c.getAccountQueue().connectAll();
         if(exceptions != null) {
