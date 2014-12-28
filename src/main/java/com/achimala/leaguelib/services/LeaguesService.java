@@ -26,7 +26,7 @@ import com.achimala.leaguelib.models.LeagueMatchmakingQueue;
 import com.achimala.leaguelib.models.LeagueSummoner;
 import com.achimala.leaguelib.models.LeagueSummonerLeagueStats;
 import com.achimala.util.Callback;
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public class LeaguesService extends LeagueAbstractService {
     public LeaguesService(LeagueConnection connection) {

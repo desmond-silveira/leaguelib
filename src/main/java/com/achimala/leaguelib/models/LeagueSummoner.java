@@ -16,10 +16,10 @@
 
 package com.achimala.leaguelib.models;
 
-import com.achimala.leaguelib.connection.LeagueServer;
 import com.achimala.leaguelib.models.masteries.MasteryBook;
 import com.achimala.leaguelib.models.runes.RuneBook;
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.ServerInfo;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 import java.util.List;
 import java.util.Comparator;
@@ -31,7 +31,7 @@ public class LeagueSummoner {
     private int _profileIconId=0, _level=0;
     private String _name, _internalName;
     private boolean _isBot = false;
-    private LeagueServer _server;
+    private ServerInfo _server;
     private LeagueSummonerProfileInfo _profileInfo;
     private LeagueSummonerLeagueStats _leagueStats;
     private LeagueSummonerRankedStats _rankedStats;
@@ -55,14 +55,14 @@ public class LeagueSummoner {
     //     _name = name;
     // }
 
-    public LeagueSummoner(TypedObject obj, LeagueServer server) {
+    public LeagueSummoner(TypedObject obj, ServerInfo server) {
         this(obj, server, false);
     }
 
     // The isGamePlayer flag exists because Riot uses the key accountId when the summoner is in a Game DTO
     // (when it's returned from gameService.retrieveInProgressSpectatorGameInfo)
     // But when it's returned via summonerService it's called acctId
-    public LeagueSummoner(TypedObject obj, LeagueServer server, boolean isGamePlayer) {
+    public LeagueSummoner(TypedObject obj, ServerInfo server, boolean isGamePlayer) {
         this();
         if(isGamePlayer) {
             _isBot = obj.type.equals("com.riotgames.platform.game.BotParticipant");
@@ -144,7 +144,7 @@ public class LeagueSummoner {
         _isBot = bot;
     }
 
-    public void setServer(LeagueServer server) {
+    public void setServer(ServerInfo server) {
         _server = server;
     }
 
@@ -210,7 +210,7 @@ public class LeagueSummoner {
         return _isBot;
     }
 
-    public LeagueServer getServer() {
+    public ServerInfo getServer() {
         return _server;
     }
 

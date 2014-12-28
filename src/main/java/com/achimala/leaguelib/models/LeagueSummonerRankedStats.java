@@ -16,7 +16,7 @@
 
 package com.achimala.leaguelib.models;
 
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.LinkedList;

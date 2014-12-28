@@ -16,20 +16,16 @@
 
 package com.achimala.leaguelib;
 
+import com.achimala.leaguelib.connection.LeagueAccount;
+import com.achimala.leaguelib.connection.LeagueConnection;
+import com.achimala.leaguelib.errors.LeagueException;
+import com.achimala.leaguelib.models.*;
+import com.achimala.util.Callback;
+import com.gvaneyck.rtmp.ServerInfo;
+
 import java.util.Map;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-
-import com.achimala.leaguelib.connection.LeagueAccount;
-import com.achimala.leaguelib.connection.LeagueConnection;
-import com.achimala.leaguelib.connection.LeagueServer;
-import com.achimala.leaguelib.errors.LeagueException;
-import com.achimala.leaguelib.models.LeagueChampion;
-import com.achimala.leaguelib.models.LeagueGame;
-import com.achimala.leaguelib.models.LeagueRankedStatType;
-import com.achimala.leaguelib.models.LeagueSummoner;
-import com.achimala.leaguelib.models.LeagueSummonerLeagueStats;
-import com.achimala.util.Callback;
 
 // This tests pretty much everything. It downloads as much information as it can about a given summoner and displays it.
 // NOTE: You must pass in the password of the account(s) being used as a command line argument, so if someone pulls
@@ -59,10 +55,10 @@ public class MainTest {
     }
 
     public static void main(String[] args) throws Exception {
-        final LeagueConnection c = new LeagueConnection(LeagueServer.NORTH_AMERICA);
+        final LeagueConnection c = new LeagueConnection(ServerInfo.EUW);
         c.getAccountQueue().addAccount(new LeagueAccount(
-                LeagueServer.NORTH_AMERICA, "3.14.xx", "statstrats", args[0]));
-        final String SUMMONER_TO_LOOK_UP = "rf legendary";
+                ServerInfo.EUW, "4.21.14", "Noobie3110", args[0]));
+        final String SUMMONER_TO_LOOK_UP = "Noobie3110";
 
         Map<LeagueAccount, LeagueException> exceptions = c.getAccountQueue().connectAll();
         if(exceptions != null) {

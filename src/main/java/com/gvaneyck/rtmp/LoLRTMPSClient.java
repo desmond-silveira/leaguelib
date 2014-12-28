@@ -1,4 +1,5 @@
 package com.gvaneyck.rtmp;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,21 +11,24 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.gvaneyck.rtmp.encoding.Base64;
+import com.gvaneyck.rtmp.encoding.JSON;
+import com.gvaneyck.rtmp.encoding.ObjectMap;
+import com.gvaneyck.rtmp.encoding.TypedObject;
+
 /**
  * A very basic RTMPS client for connecting to League of Legends
- *
+ * 
  * @author Gabriel Van Eyck
  */
-public class LoLRTMPSClient extends RTMPSClient
-{
+public class LoLRTMPSClient extends RTMPSClient {
     /** Server information */
     private static final int port = 2099; // Must be 2099
+    private ServerInfo serverInfo;
     private String server;
     private String region;
 
@@ -51,39 +55,31 @@ public class LoLRTMPSClient extends RTMPSClient
 
     /**
      * A basic test for LoLRTMPSClient
-     *
+     * 
      * @param args Unused
      */
-    public static void main(String[] args)
-    {
-        LoLRTMPSClient client = new LoLRTMPSClient("VN", "1.70.FOOBAR", "jabetest1", "jabetest1");
-        //client.debug = true;
+    public static void main(String[] args) {
+        LoLRTMPSClient client = new LoLRTMPSClient(ServerInfo.NA, "4.8.FOOBAR", "qweasn", "123qwe123qw");
 
-        try
-        {
+        try {
             int id;
             client.connectAndLogin();
-            //client.reconnect();
+            // client.reconnect();
 
             // Synchronous invoke
             id = client.invoke("summonerService", "getSummonerByName", new Object[] { "Jabe" });
             System.out.println(client.getResult(id));
 
             // Asynchronous invoke
-            client.invokeWithCallback("summonerService", "getSummonerByName", new Object[] { "Jabe" },
-                    new Callback()
-                    {
-                        @Override
-                        public void callback(TypedObject result)
-                        {
-                            System.out.println(result);
-                        }
-                    });
+            client.invokeWithCallback("summonerService", "getSummonerByName", new Object[] { "Jabe" }, new RTMPCallback() {
+                public void callback(TypedObject result) {
+                    System.out.println(result);
+                }
+            });
 
             client.join(); // Wait for all current requests to finish
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -91,18 +87,29 @@ public class LoLRTMPSClient extends RTMPSClient
     }
 
     /**
+     * Hidden constructor
+     */
+    @SuppressWarnings("unused")
+    private LoLRTMPSClient() {
+        super();
+    }
+
+    /**
      * Sets up a RTMPSClient for this client to use
-     *
+     * 
      * @param region The region to connect to (NA/EUW/EUN)
-     * @param clientVersion The current client version for LoL (top left of client)
+     * @param clientVersion The current client version for LoL (top left of
+     *            client)
      * @param user The user to login as
      * @param pass The user's password
      */
-    public LoLRTMPSClient(String region, String clientVersion, String user, String pass)
-    {
-        region = region.toUpperCase();
+    public LoLRTMPSClient(ServerInfo serverInfo, String clientVersion, String user, String pass) {
+        this.serverInfo = serverInfo;
+        this.region = serverInfo.region;
+        this.server = serverInfo.server;
+        this.loginQueue = serverInfo.loginQueue;
+        this.useGarena = serverInfo.useGarena;
 
-        this.region = region;
         this.clientVersion = clientVersion;
         this.user = user;
         this.pass = pass;
@@ -110,128 +117,44 @@ public class LoLRTMPSClient extends RTMPSClient
         // I believe this matters for running the game client
         this.locale = "en_US";
 
-        if (region.equals("NA"))
-        {
-            this.server = "prod.na1.lol.riotgames.com";
-            this.loginQueue = "https://lq.na1.lol.riotgames.com/";
-        }
-        else if (region.equals("EUW"))
-        {
-            this.server = "prod.eu.lol.riotgames.com";
-            this.loginQueue = "https://lq.eu.lol.riotgames.com/";
-        }
-        else if (region.equals("EUN") || region.equals("EUNE"))
-        {
-            this.server = "prod.eun1.lol.riotgames.com";
-            this.loginQueue = "https://lq.eun1.lol.riotgames.com/";
-        }
-        else if (region.equals("KR"))
-        {
-            this.server = "prod.kr.lol.riotgames.com";
-            this.loginQueue = "https://lq.kr.lol.riotgames.com/";
-        }
-        else if (region.equals("BR"))
-        {
-            this.server = "prod.br.lol.riotgames.com";
-            this.loginQueue = "https://lq.br.lol.riotgames.com/";
-        }
-        else if (region.equals("LAN"))
-        {
-            this.server = "prod.la1.lol.riotgames.com";
-            this.loginQueue = "https://lq.la1.lol.riotgames.com/";
-        }
-        else if (region.equals("LAS"))
-        {
-            this.server = "prod.la2.lol.riotgames.com";
-            this.loginQueue = "https://lq.la2.lol.riotgames.com/";
-        }
-        else if (region.equals("OCE"))
-        {
-            this.server = "prod.oc1.lol.riotgames.com";
-            this.loginQueue = "https://lq.oc1.lol.riotgames.com/";
-        }
-        else if (region.equals("TR"))
-        {
-            this.server = "prod.tr.lol.riotgames.com";
-            this.loginQueue = "https://lq.tr.lol.riotgames.com/";
-        }
-        else if (region.equals("RU"))
-        {
-            this.server = "prod.ru.lol.riotgames.com";
-            this.loginQueue = "https://lq.ru.lol.riotgames.com/";
-        }
-        else if (region.equals("PBE"))
-        {
-            this.server = "prod.pbe1.lol.riotgames.com";
-            this.loginQueue = "https://lq.pbe1.lol.riotgames.com/";
-        }
-        else if (region.equals("SG") || region.equals("MY") || region.equals("SG/MY"))
-        {
-            this.server = "prod.lol.garenanow.com";
-            this.loginQueue = "https://lq.lol.garenanow.com/";
-            this.useGarena = true;
-        }
-        else if (region.equals("TW"))
-        {
-            this.server = "prodtw.lol.garenanow.com";
-            this.loginQueue = "https://loginqueuetw.lol.garenanow.com/";
-            this.useGarena = true;
-        }
-        else if (region.equals("TH"))
-        {
-            this.server = "prodth.lol.garenanow.com";
-            this.loginQueue = "https://lqth.lol.garenanow.com/";
-            this.useGarena = true;
-        }
-        else if (region.equals("PH"))
-        {
-            this.server = "prodph.lol.garenanow.com";
-            this.loginQueue = "https://storeph.lol.garenanow.com/";
-            this.useGarena = true;
-        }
-        else if (region.equals("VN"))
-        {
-            this.server = "prodvn.lol.garenanow.com";
-            this.loginQueue = "https://lqvn.lol.garenanow.com/";
-            this.useGarena = true;
-        }
-        else
-        {
-            System.out.println("Invalid region: " + region);
-            System.out.println("Valid regions are: NA, EUW, EUN/EUNE, KR, BR, LAN, LAS, OCE, TR, PBE, SG/MY, TW, TH, PH, VN");
-            System.exit(0);
-        }
-
         setConnectionInfo(this.server, port, "", "app:/mod_ser.dat", null);
     }
 
     /**
-     * Sets the locale.  I believe this matters for starting the game (looks for fontconfig_locale.txt)
+     * Sets the locale. I believe this matters for starting the game (looks for
+     * fontconfig_locale.txt)
+     * 
      * @param locale The locale to use
      */
-    public void setLocale(String locale)
-    {
+    public void setLocale(String locale) {
         this.locale = locale;
     }
 
     /**
+     * Retrieves the server info used to create this client
+     * 
+     * @return The client's server info
+     */
+    public ServerInfo getServerInfo() {
+        return serverInfo;
+    }
+
+    /**
      * Connects and logs in using the information previously provided
-     *
+     * 
      * @throws IOException
      */
-    public void connectAndLogin() throws IOException
-    {
+    public void connectAndLogin() throws IOException {
         connect();
         login();
     }
 
     /**
      * Logs into Riot's servers
-     *
+     * 
      * @throws IOException
      */
-    public void login() throws IOException
-    {
+    public void login() throws IOException {
         if (useGarena)
             getGarenaToken();
 
@@ -246,7 +169,8 @@ public class LoLRTMPSClient extends RTMPSClient
             body.put("username", userID);
         else
             body.put("username", user);
-        body.put("password", pass); // Garena doesn't actually care about password here
+        body.put("password", pass); // Garena doesn't actually care about
+                                    // password here
         body.put("authToken", authToken);
         body.put("clientVersion", clientVersion);
         body.put("ipAddress", ipAddress);
@@ -287,8 +211,8 @@ public class LoLRTMPSClient extends RTMPSClient
         body = wrapBody(new Object[] { new TypedObject() }, "messagingDestination", 0);
         body.type = "flex.messaging.messages.CommandMessage";
         TypedObject headers = body.getTO("headers");
-        //headers.put("DSRemoteCredentialsCharset", null); // unneeded
-        //headers.put("DSRemoteCredentials", "");
+        // headers.put("DSRemoteCredentialsCharset", null); // unneeded
+        // headers.put("DSRemoteCredentials", "");
 
         // bc
         headers.put("DSSubtopic", "bc");
@@ -309,38 +233,26 @@ public class LoLRTMPSClient extends RTMPSClient
         result = getResult(id); // Read result and discard
 
         // Start the heartbeat
-        new HeartbeatThread();
+        new LCDSHeartbeat(this);
 
         loggedIn = true;
 
-        // System.out.println("Connected to " + region);
-    }
-
-    /**
-    * Added by Gavin Saldanha
-    */
-    public String getUser() {
-        return user;
+        System.out.println("Connected to " + region);
     }
 
     /**
      * Closes the connection
      */
-    @Override
-    public void close()
-    {
+    public void close() {
         loggedIn = false;
 
-        if (out != null)
-        {
+        if (out != null) {
             // And attempt to logout, but don't care if we fail
-            try
-            {
+            try {
                 int id = invoke("loginService", "logout", new Object[] { authToken });
                 join(id);
             }
-            catch (IOException e)
-            {
+            catch (IOException e) {
                 // Ignored
             }
         }
@@ -351,86 +263,75 @@ public class LoLRTMPSClient extends RTMPSClient
     /**
      * Additional reconnect steps for logging in after a reconnect
      */
-    @Override
-    public void reconnect()
-    {
+    public void reconnect() {
         // Socket/RTMP reconnect
         super.reconnect();
 
         // Then login
-        while (!isLoggedIn())
-        {
-            try
-            {
+        while (!isLoggedIn()) {
+            try {
                 login();
             }
-            catch (IOException e)
-            {
+            catch (IOException e) {
                 System.err.println("Error when reconnecting: ");
                 e.printStackTrace(); // For debug purposes
 
-                // This is not necessary; handled externally
-                // sleep(5000);
-                // super.reconnect(); // Need to reconnect again here
+                sleep(5000);
+                super.reconnect(); // Need to reconnect again here
             }
         }
     }
 
     /**
      * Returns the login state
-     *
+     * 
      * @return True if passed login queue and commands
      */
-    public boolean isLoggedIn()
-    {
+    public boolean isLoggedIn() {
         return loggedIn;
     }
 
     /**
      * Extracts the rootCause from an error message
-     *
+     * 
      * @param message The packet result
      * @return The error message
      */
-    public String getErrorMessage(TypedObject message)
-    {
+    public String getErrorMessage(TypedObject message) {
         // Works for clientVersion
-        return (debug ? message.toString() : message.getTO("data").getTO("rootCause").getString("message"));
+        return message.getTO("data").getTO("rootCause").getString("message");
     }
 
     /**
      * Calls Riot's IP address informer
-     *
+     * 
      * @throws IOException
      */
-    private void getIPAddress() throws IOException
-    {
+    private void getIPAddress() throws IOException {
         // Don't need to retrieve IP address on reconnect (probably)
         if (ipAddress != null)
             return;
 
         String response = readURL("http://ll.leagueoflegends.com/services/connection_info");
 
-        // If we can't get an IP address for whatever reason (site's down, etc.) use localhost
-        if (response == null)
-        {
+        // If we can't get an IP address for whatever reason (site's down, etc.)
+        // use localhost
+        if (response == null) {
             ipAddress = "127.0.0.1";
             return;
         }
 
-        TypedObject result = (TypedObject)JSON.parse(response);
+        ObjectMap result = (ObjectMap)JSON.parse(response);
         ipAddress = result.getString("ip_address");
     }
 
     /**
      * Gets an authentication token from Garena to log in
-     *
+     * 
      * @throws IOException
      */
-    private void getGarenaToken() throws IOException
-    {
-        try
-        {
+    private void getGarenaToken() throws IOException {
+        try {
             // This is sloppy reverse engineered (via Wireshark) code
             byte[] md5 = MessageDigest.getInstance("MD5").digest(pass.getBytes("UTF-8"));
             int[] junk;
@@ -484,7 +385,6 @@ public class LoLRTMPSClient extends RTMPSClient
             // Don't care about the rest
             sock.close();
 
-
             // Get our token
             sock = new Socket("lol.auth.garenanow.com", 12000);
 
@@ -523,25 +423,24 @@ public class LoLRTMPSClient extends RTMPSClient
 
             sock.close();
         }
-        catch (NoSuchAlgorithmException e)
-        {
+        catch (NoSuchAlgorithmException e) {
             throw new IOException(e.getMessage());
         }
     }
 
     /**
      * Gets an authentication token for logging into Riot's servers
-     *
+     * 
      * @throws IOException
      */
-    private void getAuthToken() throws IOException
-    {
+    private void getAuthToken() throws IOException {
         // login-queue/rest/queue/authenticate
         // {"rate":60,"token":"d9a18f08-8159-4c27-9f3a-7927462b5150","reason":"login_rate","status":"LOGIN","delay":10000,"user":"USERHERE"}
         // --- OR ---
         // {"node":388,"vcap":20000,"rate":30,
         // "tickers":[
-        // {"id":267284,"node":388,"champ":"Soraka","current":248118}, CHAMP MATTERS
+        // {"id":267284,"node":388,"champ":"Soraka","current":248118}, CHAMP
+        // MATTERS
         // {"id":266782,"node":389,"champ":"Soraka","current":247595},
         // {"id":269287,"node":390,"champ":"Soraka","current":249444},
         // {"id":270005,"node":387,"champ":"Soraka","current":249735},
@@ -570,14 +469,12 @@ public class LoLRTMPSClient extends RTMPSClient
         URL url = new URL(loginQueue + "login-queue/rest/queue/authenticate");
 
         HttpURLConnection connection;
-        if (loginQueue.startsWith("https:"))
-        {
+        if (loginQueue.startsWith("https:")) {
             // Need to ignore certs (or use the one retrieved by RTMPSClient?)
             HttpsURLConnection.setDefaultSSLSocketFactory((SSLSocketFactory)DummySSLSocketFactory.getDefault());
             connection = (HttpsURLConnection)url.openConnection();
         }
-        else
-        {
+        else {
             connection = (HttpURLConnection)url.openConnection();
         }
 
@@ -593,38 +490,37 @@ public class LoLRTMPSClient extends RTMPSClient
 
         // Read the response
         String response;
-        TypedObject result;
-        try
-        {
+        ObjectMap result;
+        try {
             response = readAll(connection.getInputStream());
-            result = (TypedObject)JSON.parse(response);
+            result = (ObjectMap)JSON.parse(response);
         }
-        catch (IOException e)
-        {
+        catch (IOException e) {
             System.err.println("Incorrect username or password");
             throw e;
         }
 
         // Check for banned or other failures
-        //{"rate":0,"reason":"account_banned","status":"FAILED","delay":10000,"banned":7647952951000}
+        // {"rate":0,"reason":"account_banned","status":"FAILED","delay":10000,"banned":7647952951000}
         if (result.get("status").equals("FAILED"))
             throw new IOException("Error logging in: " + result.get("reason"));
 
         // Handle login queue
-        if (!result.containsKey("token"))
-        {
+        if (!result.containsKey("token")) {
             int node = result.getInt("node"); // Our login queue ID
             String nodeStr = "" + node;
-            String champ = result.getString("champ"); // The name of our login queue
-            int rate = result.getInt("rate"); // How many tickets are processed every queue update
-            int delay = result.getInt("delay"); // How often the queue status updates
+            String champ = result.getString("champ"); // The name of our login
+                                                      // queue
+            int rate = result.getInt("rate"); // How many tickets are processed
+                                              // every queue update
+            int delay = result.getInt("delay"); // How often the queue status
+                                                // updates
 
             int id = 0;
             int cur = 0;
             Object[] tickers = result.getArray("tickers");
-            for (Object o : tickers)
-            {
-                TypedObject to = (TypedObject)o;
+            for (Object o : tickers) {
+                ObjectMap to = (ObjectMap)o;
 
                 // Find our queue
                 int tnode = to.getInt("node");
@@ -632,7 +528,8 @@ public class LoLRTMPSClient extends RTMPSClient
                     continue;
 
                 id = to.getInt("id"); // Our ticket in line
-                cur = to.getInt("current"); // The current ticket being processed
+                cur = to.getInt("current"); // The current ticket being
+                                            // processed
                 break;
             }
 
@@ -640,26 +537,24 @@ public class LoLRTMPSClient extends RTMPSClient
             System.out.println("In login queue for " + region + ", #" + (id - cur) + " in line");
 
             // Request the queue status until there's only 'rate' left to go
-            while (id - cur > rate)
-            {
+            while (id - cur > rate) {
                 sleep(delay); // Sleep until the queue updates
                 response = readURL(loginQueue + "login-queue/rest/queue/ticker/" + champ);
-                result = (TypedObject)JSON.parse(response);
+                result = (ObjectMap)JSON.parse(response);
                 if (result == null)
                     continue;
 
                 cur = hexToInt(result.getString(nodeStr));
-                System.out.println("In login queue for " + region + ", #" + Math.max(1, id - cur) + " in line");
+                System.out.println("In login queue for " + region + ", #" + (int)Math.max(1, id - cur) + " in line");
             }
 
             // Then try getting our token repeatedly
             response = readURL(loginQueue + "login-queue/rest/queue/authToken/" + user.toLowerCase());
-            result = (TypedObject)JSON.parse(response);
-            while (response == null || !result.containsKey("token"))
-            {
+            result = (ObjectMap)JSON.parse(response);
+            while (response == null || !result.containsKey("token")) {
                 sleep(delay / 10);
                 response = readURL(loginQueue + "login-queue/rest/queue/authToken/" + user.toLowerCase());
-                result = (TypedObject)JSON.parse(response);
+                result = (ObjectMap)JSON.parse(response);
             }
         }
 
@@ -669,25 +564,21 @@ public class LoLRTMPSClient extends RTMPSClient
 
     /**
      * Reads all data available at a given URL
-     *
+     * 
      * @param url The URL to read
      * @return All data present at the given URL
      * @throws IOException
      */
-    private String readURL(String url)
-    {
-        try
-        {
+    private String readURL(String url) {
+        try {
             return readAll(new URL(url).openStream());
         }
-        catch (MalformedURLException e)
-        {
+        catch (MalformedURLException e) {
             // Should never happen
             e.printStackTrace();
             return null;
         }
-        catch (IOException e)
-        {
+        catch (IOException e) {
             // Only happens when we try to get our token too fast
             return null;
         }
@@ -695,13 +586,12 @@ public class LoLRTMPSClient extends RTMPSClient
 
     /**
      * Reads all data from the given InputStream
-     *
+     * 
      * @param in The InputStream to read from
      * @return All data from the given InputStream
      * @throws IOException
      */
-    private String readAll(InputStream in) throws IOException
-    {
+    private String readAll(InputStream in) throws IOException {
         StringBuilder ret = new StringBuilder();
 
         // Read in each character until end-of-stream is detected
@@ -714,15 +604,13 @@ public class LoLRTMPSClient extends RTMPSClient
 
     /**
      * Converts a hex string to an integer
-     *
+     * 
      * @param hex The hex string
      * @return The equivalent integer
      */
-    private int hexToInt(String hex)
-    {
+    private int hexToInt(String hex) {
         int total = 0;
-        for (int i = 0; i < hex.length(); i++)
-        {
+        for (int i = 0; i < hex.length(); i++) {
             char c = hex.charAt(i);
             if (c >= '0' && c <= '9')
                 total = total * 16 + c - '0';
@@ -733,53 +621,21 @@ public class LoLRTMPSClient extends RTMPSClient
         return total;
     }
 
-    private static volatile Thread curThread;
+    /**
+     * Returns the account ID for this connection
+     * 
+     * @return The account ID
+     */
+    public int getAccountID() {
+        return accountID;
+    }
 
     /**
-     * Executes a LCDSHeartBeat every 2 minutes
+     * Returns the session token for this connection
+     * 
+     * @return The session token
      */
-    class HeartbeatThread
-    {
-        private int heartbeat;
-        private SimpleDateFormat sdf = new SimpleDateFormat("ddd MMM d yyyy HH:mm:ss 'GMTZ'");
-
-        public HeartbeatThread()
-        {
-            this.heartbeat = 1;
-            curThread = new Thread() {
-                @Override
-                public void run() {
-                    beatHeart(this);
-                }
-            };
-            curThread.setName("LoLRTMPSClient (HeartbeatThread)");
-            curThread.setDaemon(true);
-            curThread.start();
-        }
-
-        private void beatHeart(Thread thread)
-        {
-            while (curThread == thread)
-            {
-                try
-                {
-                    long hbTime = System.currentTimeMillis();
-
-                    int id = invoke("loginService", "performLCDSHeartBeat", new Object[] { accountID, sessionToken, heartbeat, sdf.format(new Date()) });
-                    cancel(id); // Ignore result for now
-
-                    heartbeat++;
-
-                    // Quick sleeps to shutdown the heartbeat quickly on a reconnect
-                    while (curThread == thread && System.currentTimeMillis() - hbTime < 120000)
-                        sleep(100);
-                }
-                catch (Exception e)
-                {
-                    if (!reconnecting)
-                        doReconnect();
-                }
-            }
-        }
+    public String getSessionToken() {
+        return sessionToken;
     }
 }

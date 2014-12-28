@@ -18,7 +18,7 @@ package com.achimala.leaguelib.models;
 
 import com.achimala.leaguelib.errors.LeagueErrorCode;
 import com.achimala.leaguelib.errors.LeagueException;
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public class LeagueSummonerLeagueStats {
     private class MiniSeries {

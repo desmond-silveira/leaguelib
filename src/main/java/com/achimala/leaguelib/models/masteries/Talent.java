@@ -1,6 +1,6 @@
 package com.achimala.leaguelib.models.masteries;
 
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public class Talent {
 

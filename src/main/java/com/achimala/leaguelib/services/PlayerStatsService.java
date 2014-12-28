@@ -31,7 +31,7 @@ import com.achimala.leaguelib.models.LeagueSummonerPlayerStats;
 import com.achimala.leaguelib.models.LeagueSummonerRankedStats;
 import com.achimala.leaguelib.models.MatchHistoryEntry;
 import com.achimala.util.Callback;
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public class PlayerStatsService extends LeagueAbstractService {
     private final String SUMMONERS_RIFT = "CLASSIC";

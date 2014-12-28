@@ -1,21 +1,13 @@
 package com.achimala.leaguelib;
 
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import com.achimala.leaguelib.connection.LeagueAccount;
 import com.achimala.leaguelib.connection.LeagueConnection;
-import com.achimala.leaguelib.connection.LeagueServer;
 import com.achimala.leaguelib.errors.LeagueException;
-import com.achimala.leaguelib.models.LeagueChampion;
-import com.achimala.leaguelib.models.LeagueGame;
-import com.achimala.leaguelib.models.LeagueRankedStatType;
-import com.achimala.leaguelib.models.LeagueSummoner;
-import com.achimala.leaguelib.models.LeagueSummonerLeagueStats;
+import com.achimala.leaguelib.models.*;
+import com.gvaneyck.rtmp.ServerInfo;
+
+import java.util.Map;
+import java.util.concurrent.*;
 
 public class FuturesTests {
 
@@ -36,8 +28,8 @@ public class FuturesTests {
     }
 
     public static void main(String[] args) throws Exception {
-        final LeagueConnection c = new LeagueConnection(LeagueServer.NORTH_AMERICA);
-        c.getAccountQueue().addAccount(new LeagueAccount(LeagueServer.NORTH_AMERICA, "3.10.xx", args[0], args[1]));
+        final LeagueConnection c = new LeagueConnection(ServerInfo.NA);
+        c.getAccountQueue().addAccount(new LeagueAccount(ServerInfo.NA, "3.10.xx", args[0], args[1]));
 
         Map<LeagueAccount, LeagueException> exceptions = c.getAccountQueue().connectAll();
         if(exceptions != null) {

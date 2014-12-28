@@ -3,7 +3,7 @@ package com.achimala.leaguelib.models.runes;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public class RuneBook {
 

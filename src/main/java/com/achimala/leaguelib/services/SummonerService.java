@@ -29,7 +29,7 @@ import com.achimala.leaguelib.models.LeagueSummonerProfileInfo;
 import com.achimala.leaguelib.models.SummonerSpell;
 import com.achimala.leaguelib.models.runes.RuneBook;
 import com.achimala.util.Callback;
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public class SummonerService extends LeagueAbstractService {
     public SummonerService(LeagueConnection connection) {
