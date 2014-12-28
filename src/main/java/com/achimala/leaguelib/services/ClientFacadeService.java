@@ -7,7 +7,7 @@ import com.achimala.leaguelib.connection.LeagueConnection;
 import com.achimala.leaguelib.errors.LeagueException;
 import com.achimala.leaguelib.models.LeagueHonorType;
 import com.achimala.leaguelib.models.LeagueSummoner;
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public class ClientFacadeService extends LeagueAbstractService {
 

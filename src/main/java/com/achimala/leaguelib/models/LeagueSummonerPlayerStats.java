@@ -19,7 +19,7 @@ package com.achimala.leaguelib.models;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public class LeagueSummonerPlayerStats {
 

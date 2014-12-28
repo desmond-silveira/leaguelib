@@ -20,7 +20,7 @@ import com.achimala.leaguelib.connection.LeagueConnection;
 import com.achimala.leaguelib.errors.LeagueErrorCode;
 import com.achimala.leaguelib.errors.LeagueException;
 import com.achimala.util.Callback;
-import com.gvaneyck.rtmp.TypedObject;
+import com.gvaneyck.rtmp.encoding.TypedObject;
 
 public abstract class LeagueAbstractService {
     protected LeagueConnection _connection = null;
@@ -36,7 +36,7 @@ public abstract class LeagueAbstractService {
     protected TypedObject handleResult(TypedObject result) throws LeagueException {
         if(result.get("result").equals("_error")) {
             System.err.println(result);
-            String reason = result.getExceptionMessage();
+            String reason = result.toPrettyString();
             throw new LeagueException(LeagueErrorCode.getErrorCodeForException(reason), reason);
         }
         return result.getTO("data");

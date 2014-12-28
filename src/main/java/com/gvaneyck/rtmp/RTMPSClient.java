@@ -1,4 +1,5 @@
 package com.gvaneyck.rtmp;
+
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -8,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.KeyStore;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,14 +25,16 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import com.gvaneyck.rtmp.encoding.AMF3Decoder;
+import com.gvaneyck.rtmp.encoding.AMF3Encoder;
+import com.gvaneyck.rtmp.encoding.TypedObject;
+
 /**
  * A very basic RTMPS client
- *
+ * 
  * @author Gabriel Van Eyck
  */
-public class RTMPSClient
-{
-    public boolean debug = false;
+public class RTMPSClient {
     private static char[] passphrase = "changeit".toCharArray();
 
     /** Server information */
@@ -69,29 +71,26 @@ public class RTMPSClient
     private Map<Integer, TypedObject> results = Collections.synchronizedMap(new HashMap<Integer, TypedObject>());
 
     /** Callback list */
-    protected Map<Integer, Callback> callbacks = Collections.synchronizedMap(new HashMap<Integer, Callback>());
+    protected Map<Integer, RTMPCallback> callbacks = Collections.synchronizedMap(new HashMap<Integer, RTMPCallback>());
 
     /** Receive handler */
-    protected volatile Callback receiveCallback = null;
+    protected volatile RTMPCallback receiveCallback = null;
 
     /**
      * A simple test for doing the basic RTMPS connection to Riot
-     *
+     * 
      * @param args Unused
      */
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         RTMPSClient client = new RTMPSClient("prod.na1.lol.riotgames.com", 2099, "", "app:/mod_ser.dat", null);
-        try
-        {
+        try {
             client.connect();
             if (client.isConnected())
                 System.out.println("Success");
             else
                 System.out.println("Failure");
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -101,35 +100,32 @@ public class RTMPSClient
     /**
      * Basic constructor, need to use setConnectionInfo
      */
-    public RTMPSClient()
-    {
+    public RTMPSClient() {
     }
 
     /**
      * Sets up the client with the given parameters
-     *
+     * 
      * @param server The RTMPS server address
      * @param port The RTMPS server port
      * @param app The app to use in the connect call
      * @param swfUrl The swf URL to use in the connect call
      * @param pageUrl The page URL to use in the connect call
      */
-    public RTMPSClient(String server, int port, String app, String swfUrl, String pageUrl)
-    {
+    public RTMPSClient(String server, int port, String app, String swfUrl, String pageUrl) {
         setConnectionInfo(server, port, app, swfUrl, pageUrl);
     }
 
     /**
      * Sets up the client with the given parameters
-     *
+     * 
      * @param server The RTMPS server address
      * @param port The RTMPS server port
      * @param app The app to use in the connect call
      * @param swfUrl The swf URL to use in the connect call
      * @param pageUrl The page URL to use in the connect call
      */
-    public void setConnectionInfo(String server, int port, String app, String swfUrl, String pageUrl)
-    {
+    public void setConnectionInfo(String server, int port, String app, String swfUrl, String pageUrl) {
         this.server = server;
         this.port = port;
 
@@ -140,58 +136,53 @@ public class RTMPSClient
 
     /**
      * Wrapper for sleep
+     * 
      * @param ms The time to sleep
      */
-    protected void sleep(long ms)
-    {
-        try
-        {
+    protected void sleep(long ms) {
+        try {
             Thread.sleep(ms);
         }
-        catch (InterruptedException e)
-        {
+        catch (InterruptedException e) {
         }
     }
 
     /**
      * Closes the connection
      */
-    public void close()
-    {
+    public void close() {
         connected = false;
 
         // We could join here, but should leave that to the programmer
         // Typically close should be preceded by a call to join if necessary
 
-        try
-        {
+        try {
             if (sslsocket != null)
                 sslsocket.close();
         }
-        catch (IOException e)
-        {
+        catch (IOException e) {
             // Do nothing
             // e.printStackTrace();
         }
 
-        // Reset pending invokes and callbacks so this connection can be restarted
+        // Reset pending invokes and callbacks so this connection can be
+        // restarted
         pendingInvokes = Collections.synchronizedSet(new HashSet<Integer>());
-        callbacks = Collections.synchronizedMap(new HashMap<Integer, Callback>());
+        callbacks = Collections.synchronizedMap(new HashMap<Integer, RTMPCallback>());
     }
 
     /**
      * Does a threaded reconnect
      */
-    public void doReconnect()
-    {
-        Thread t = new Thread()
-                {
-                    @Override
-                    public void run()
-                    {
-                        reconnect();
-                    }
-                };
+    public void doReconnect() {
+        if (reconnecting || !connected)
+            return;
+
+        Thread t = new Thread() {
+            public void run() {
+                reconnect();
+            }
+        };
         t.setName("RTMPSClient (reconnect)");
         t.setDaemon(true);
         t.start();
@@ -200,21 +191,17 @@ public class RTMPSClient
     /**
      * Attempts a reconnect (connect until success)
      */
-    public void reconnect()
-    {
+    public void reconnect() {
         reconnecting = true;
 
         close();
 
         // Attempt reconnects every 5s
-        while (!isConnected())
-        {
-            try
-            {
+        while (!isConnected()) {
+            try {
                 connect();
             }
-            catch (IOException e)
-            {
+            catch (IOException e) {
                 System.err.println("Error when reconnecting: ");
                 e.printStackTrace(); // For debug purposes
 
@@ -227,13 +214,12 @@ public class RTMPSClient
 
     /**
      * Opens the socket with the default or a previously saved certificate
+     * 
      * @return A special TrustManager to save the certificate if necessary
      * @throws IOException
      */
-    private SavingTrustManager openSocketWithCert() throws IOException
-    {
-        try
-        {
+    private SavingTrustManager openSocketWithCert() throws IOException {
+        try {
             // Load the default KeyStore or a saved one
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
             File file = new File("certs/" + server + ".cert");
@@ -256,9 +242,9 @@ public class RTMPSClient
 
             return tm;
         }
-        catch (Exception e)
-        {
-            // Hitting an exception here is very bad since we probably won't recover
+        catch (Exception e) {
+            // Hitting an exception here is very bad since we probably won't
+            // recover
             // (unless it's a connectivity issue)
 
             // Rethrow as an IOException
@@ -268,33 +254,29 @@ public class RTMPSClient
 
     /**
      * Downloads and installs a certificate if necessary
+     * 
      * @throws IOException
      */
-    private void getCertificate() throws IOException
-    {
-        try
-        {
+    private void getCertificate() throws IOException {
+        try {
             SavingTrustManager tm = openSocketWithCert();
 
             // Try to handshake the socket
             boolean success = false;
-            try
-            {
+            try {
                 sslsocket.startHandshake();
                 success = true;
             }
-            catch (SSLException e)
-            {
+            catch (SSLException e) {
                 sslsocket.close();
             }
 
-            // If we failed to handshake, save the certificate we got and try again
-            if (!success)
-            {
+            // If we failed to handshake, save the certificate we got and try
+            // again
+            if (!success) {
                 // Set up the directory if needed
                 File dir = new File("certs");
-                if (!dir.isDirectory())
-                {
+                if (!dir.isDirectory()) {
                     dir.delete();
                     dir.mkdir();
                 }
@@ -322,34 +304,33 @@ public class RTMPSClient
                 System.out.println("Installed cert for " + server);
             }
         }
-        catch (Exception e)
-        {
-            // Hitting an exception here is very bad since we probably won't recover
+        catch (Exception e) {
+            // Hitting an exception here is very bad since we probably won't
+            // recover
             // (unless it's a connectivity issue)
 
             // Rethrow as an IOException
+            e.printStackTrace();
             throw new IOException(e.getMessage());
         }
     }
 
     /**
      * Attempts to connect given the previous connection information
-     *
+     * 
      * @throws IOException
      */
-    public void connect() throws IOException
-    {
-        try
-        {
+    public void connect() throws IOException {
+        try {
             sslsocket = (SSLSocket)SSLSocketFactory.getDefault().createSocket(server, port);
             in = new BufferedInputStream(sslsocket.getInputStream());
             out = new DataOutputStream(sslsocket.getOutputStream());
 
             doHandshake();
         }
-        catch (IOException e)
-        {
-            // If we failed to set up the socket, assume it's because we needed a certificate
+        catch (IOException e) {
+            // If we failed to set up the socket, assume it's because we needed
+            // a certificate
             getCertificate();
             // And use the certificate
             openSocketWithCert();
@@ -396,11 +377,10 @@ public class RTMPSClient
 
     /**
      * Executes a full RTMP handshake
-     *
+     * 
      * @throws IOException
      */
-    private void doHandshake() throws IOException
-    {
+    private void doHandshake() throws IOException {
         // C0
         byte C0 = 0x03;
         out.write(C0);
@@ -433,14 +413,14 @@ public class RTMPSClient
 
         // S2
         byte[] S2 = new byte[1536];
-        in.read(S2, 0, 1536);
+        for (int i = 0; i < S2.length; i++)
+            S2[i] = (byte)in.read();
+        // in.read(S2, 0, 1536);
 
         // Validate handshake
         boolean valid = true;
-        for (int i = 8; i < 1536; i++)
-        {
-            if (randC1[i - 8] != S2[i])
-            {
+        for (int i = 8; i < 1536; i++) {
+            if (randC1[i - 8] != S2[i]) {
                 valid = false;
                 break;
             }
@@ -452,26 +432,23 @@ public class RTMPSClient
 
     /**
      * Invokes something
-     *
+     * 
      * @param packet The packet completely setup just needing to be encoded
      * @return The invoke ID to use with getResult(), peekResult, and join()
      * @throws IOException
      */
-    public synchronized int invoke(TypedObject packet) throws IOException
-    {
+    public synchronized int invoke(TypedObject packet) throws IOException {
         int id = nextInvokeID();
         pendingInvokes.add(id);
 
-        try
-        {
+        try {
             byte[] data = aec.encodeInvoke(id, packet);
             out.write(data, 0, data.length);
             out.flush();
 
             return id;
         }
-        catch (IOException e)
-        {
+        catch (IOException e) {
             // Clear the pending invoke
             pendingInvokes.remove(id);
 
@@ -482,21 +459,20 @@ public class RTMPSClient
 
     /**
      * Invokes something
-     *
+     * 
      * @param destination The destination
      * @param operation The operation
      * @param body The arguments
      * @return The invoke ID to use with getResult(), peekResult(), and join()
      * @throws IOException
      */
-    public synchronized int invoke(String destination, Object operation, Object body) throws IOException
-    {
+    public synchronized int invoke(String destination, Object operation, Object body) throws IOException {
         return invoke(wrapBody(body, destination, operation));
     }
 
     /**
      * Invokes something asynchronously
-     *
+     * 
      * @param destination The destination
      * @param operation The operation
      * @param body The arguments
@@ -504,22 +480,20 @@ public class RTMPSClient
      * @return The invoke ID to use with getResult(), peekResult(), and join()
      * @throws IOException
      */
-    public synchronized int invokeWithCallback(String destination, Object operation, Object body, Callback cb) throws IOException
-    {
+    public synchronized int invokeWithCallback(String destination, Object operation, Object body, RTMPCallback cb) throws IOException {
         callbacks.put(invokeID, cb); // Register the callback
         return invoke(destination, operation, body);
     }
 
     /**
      * Sets up a body in a full RemotingMessage with headers, etc.
-     *
+     * 
      * @param body The body to wrap
      * @param destination The destination
      * @param operation The operation
      * @return
      */
-    protected TypedObject wrapBody(Object body, String destination, Object operation)
-    {
+    protected TypedObject wrapBody(Object body, String destination, Object operation) {
         TypedObject headers = new TypedObject();
         headers.put("DSRequestTimeout", 60);
         headers.put("DSId", DSId);
@@ -541,35 +515,31 @@ public class RTMPSClient
 
     /**
      * Returns the next invoke ID to use
-     *
+     * 
      * @return The next invoke ID
      */
-    protected int nextInvokeID()
-    {
+    protected int nextInvokeID() {
         return invokeID++;
     }
 
     /**
      * Returns the connection status
-     *
+     * 
      * @return True if connected
      */
-    public boolean isConnected()
-    {
+    public boolean isConnected() {
         return connected;
     }
 
     /**
      * Removes and returns a result for a given invoke ID if it's ready
      * Returns null otherwise
-     *
+     * 
      * @param id The invoke ID
      * @return The invoke's result or null
      */
-    public TypedObject peekResult(int id)
-    {
-        if (results.containsKey(id))
-        {
+    public TypedObject peekResult(int id) {
+        if (results.containsKey(id)) {
             TypedObject ret = results.remove(id);
             return ret;
         }
@@ -579,14 +549,12 @@ public class RTMPSClient
     /**
      * Blocks and waits for the invoke's result to be ready, then removes and
      * returns it
-     *
+     * 
      * @param id The invoke ID
      * @return The invoke's result
      */
-    public TypedObject getResult(int id)
-    {
-        while (connected && !results.containsKey(id))
-        {
+    public TypedObject getResult(int id) {
+        while (connected && !results.containsKey(id)) {
             sleep(10);
         }
 
@@ -600,10 +568,8 @@ public class RTMPSClient
     /**
      * Waits until all results have been returned
      */
-    public void join()
-    {
-        while (!pendingInvokes.isEmpty())
-        {
+    public void join() {
+        while (!pendingInvokes.isEmpty()) {
             sleep(10);
         }
     }
@@ -611,21 +577,18 @@ public class RTMPSClient
     /**
      * Waits until the specified result returns
      */
-    public void join(int id)
-    {
-        while (connected && pendingInvokes.contains(id))
-        {
+    public void join(int id) {
+        while (connected && pendingInvokes.contains(id)) {
             sleep(10);
         }
     }
 
     /**
      * Cancels an invoke and related callback if any
-     *
+     * 
      * @param id The invoke ID to cancel
      */
-    public void cancel(int id)
-    {
+    public void cancel(int id) {
         // Remove from pending invokes (only affects join())
         pendingInvokes.remove(id);
 
@@ -633,28 +596,28 @@ public class RTMPSClient
         if (peekResult(id) != null)
             return;
         // Signify a cancelled invoke by giving it a null callback
-        callbacks.put(id, null);
+        else {
+            callbacks.put(id, null);
 
-        // Check for race condition
-        if (peekResult(id) != null)
-            callbacks.remove(id);
+            // Check for race condition
+            if (peekResult(id) != null)
+                callbacks.remove(id);
+        }
     }
 
     /**
      * Sets the handler for receive packets (things like champ select)
-     *
+     * 
      * @param cb The handler to use
      */
-    public void setReceiveHandler(Callback cb)
-    {
+    public void setReceiveHandler(RTMPCallback cb) {
         receiveCallback = cb;
     }
 
     /**
      * Reads RTMP packets from a stream
      */
-    class RTMPPacketReader
-    {
+    class RTMPPacketReader {
         /** The stream to read from */
         private BufferedInputStream in;
 
@@ -663,48 +626,38 @@ public class RTMPSClient
 
         /**
          * Starts a packet reader on the given stream
-         *
+         * 
          * @param stream The stream to read packets from
          */
-        public RTMPPacketReader(InputStream stream)
-        {
+        public RTMPPacketReader(InputStream stream) {
             this.in = new BufferedInputStream(stream, 16384);
 
-            Thread curThread = new Thread()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            parsePackets(this);
-                        }
-                    };
+            Thread curThread = new Thread() {
+                public void run() {
+                    parsePackets(this);
+                }
+            };
             curThread.setName("RTMPSClient (PacketReader)");
             curThread.setDaemon(true);
             curThread.start();
         }
 
+        private byte readByte(InputStream in) throws IOException {
+            byte ret = (byte)in.read();
+            // System.out.println(String.format("%02X", ret));
+            return ret;
+        }
+
         /**
          * The main loop for the packet reader
          */
-        private void parsePackets(Thread thread)
-        {
-            try
-            {
-                //DataOutputStream out = null;
-                //if (debug)
-                //	out = new DataOutputStream(new FileOutputStream("debug.dmp"));
-
+        private void parsePackets(Thread thread) {
+            try {
                 Map<Integer, Packet> packets = new HashMap<Integer, Packet>();
 
-                while (true)
-                {
+                while (true) {
                     // Parse the basic header
-                    byte basicHeader = (byte)in.read();
-                    //if (debug)
-                    //{
-                    //	out.write(basicHeader & 0xFF);
-                    //	out.flush();
-                    //}
+                    byte basicHeader = readByte(in);
 
                     int channel = basicHeader & 0x2F;
                     int headerType = basicHeader & 0xC0;
@@ -725,20 +678,12 @@ public class RTMPSClient
                     Packet p = packets.get(channel);
 
                     // Parse the full header
-                    if (headerSize > 1)
-                    {
+                    if (headerSize > 1) {
                         byte[] header = new byte[headerSize - 1];
                         for (int i = 0; i < header.length; i++)
-                            header[i] = (byte)in.read();
-                        //if (debug)
-                        //{
-                        //	for (int i = 0; i < header.length; i++)
-                        //		out.write(header[i] & 0xFF);
-                        //	out.flush();
-                        //}
+                            header[i] = readByte(in);
 
-                        if (headerSize >= 8)
-                        {
+                        if (headerSize >= 8) {
                             int size = 0;
                             for (int i = 3; i < 6; i++)
                                 size = size * 256 + (header[i] & 0xFF);
@@ -749,9 +694,8 @@ public class RTMPSClient
                     }
 
                     // Read rest of packet
-                    for (int i = 0; i < 128; i++)
-                    {
-                        byte b = (byte)in.read();
+                    for (int i = 0; i < 128; i++) {
+                        byte b = readByte(in);
                         p.add(b);
 
                         if (p.isComplete())
@@ -791,40 +735,29 @@ public class RTMPSClient
                     else
                     // Skip most messages
                     {
-                        if (debug)
-                        {
-                            System.out.print(String.format("%02X ", p.getType()));
-                            for (byte b : p.getData())
-                                System.out.print(String.format("%02X", b & 0xff));
-                            System.out.println();
-                        }
+                        System.out.println("Unrecognized message type");
+                        System.out.print(String.format("%02X ", p.getType()));
+                        for (byte b : p.getData())
+                            System.out.print(String.format("%02X", b & 0xff));
+                        System.out.println();
                         continue;
                     }
-
-                    if (debug)
-                        System.out.println(result);
 
                     // Store result
                     Integer id = result.getInt("invokeId");
 
                     // Receive handler
-                    if (id == null || id == 0)
-                    {
+                    if (id == null || id == 0) {
                         if (receiveCallback != null)
                             receiveCallback.callback(result);
                     }
                     // Callback handler
-                    else if (callbacks.containsKey(id))
-                    {
-                        final Callback cb = callbacks.remove(id);
-                        if (cb != null)
-                        {
+                    else if (callbacks.containsKey(id)) {
+                        final RTMPCallback cb = callbacks.remove(id);
+                        if (cb != null) {
                             // Thread the callback so it doesn't hang us
-                            Thread t = new Thread()
-                            {
-                                @Override
-                                public void run()
-                                {
+                            Thread t = new Thread() {
+                                public void run() {
                                     cb.callback(result);
                                 }
                             };
@@ -832,109 +765,23 @@ public class RTMPSClient
                             t.start();
                         }
                     }
-                    else
-                    {
+                    else {
                         results.put(id, result);
                     }
                     pendingInvokes.remove(id);
                 }
             }
-            catch (IOException e)
-            {
-                if (!reconnecting && connected)
-                {
+            catch (IOException e) {
+                if (!reconnecting && connected) {
                     System.out.println("Error while reading from stream");
                     e.printStackTrace();
                 }
             }
 
             // Attempt to reconnect if this was an unintentional disconnect
-            if (!reconnecting && connected)
-            {
+            if (!reconnecting && connected) {
                 doReconnect();
             }
-        }
-    }
-
-    /**
-     * A simple packet structure for PacketReader
-     */
-    class Packet
-    {
-        private byte[] dataBuffer;
-        private int dataPos;
-        private int dataSize;
-        private int messageType;
-
-        public void setSize(int size)
-        {
-            dataSize = size;
-            dataBuffer = new byte[dataSize];
-        }
-
-        public void setType(int type)
-        {
-            messageType = type;
-        }
-
-        public void add(byte b)
-        {
-            dataBuffer[dataPos++] = b;
-        }
-
-        public boolean isComplete()
-        {
-            return (dataPos == dataSize);
-        }
-
-        public int getSize()
-        {
-            return dataSize;
-        }
-
-        public int getType()
-        {
-            return messageType;
-        }
-
-        public byte[] getData()
-        {
-            return dataBuffer;
-        }
-    }
-
-    /**
-     * Used to save certificates
-     */
-    private static class SavingTrustManager implements X509TrustManager
-    {
-        private final X509TrustManager tm;
-        private X509Certificate[] chain;
-
-        SavingTrustManager(X509TrustManager tm)
-        {
-            this.tm = tm;
-        }
-
-        @Override
-        public X509Certificate[] getAcceptedIssuers()
-        {
-            return new X509Certificate[0];
-        }
-
-        @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType)
-                throws CertificateException
-        {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType)
-                throws CertificateException
-        {
-            this.chain = chain;
-            tm.checkServerTrusted(chain, authType);
         }
     }
 }
