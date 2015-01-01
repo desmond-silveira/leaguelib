@@ -28,10 +28,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 // This tests pretty much everything. It downloads as much information as it can about a given summoner and displays it.
-// NOTE: You must pass in the password of the account(s) being used as a command line argument, so if someone pulls
-// this code and tries to run it, it's not going to work correctly out of the box.
-// If you're not one of the developers of this project, you'll want to change the account usernames and passwords below
-// to your own personal test accounts. (And change the summoner's name if you want).
+// You'll have to use a League of Legends account to pull the data from the servers.
+// NOTE: You must pass following commandline arguments to the program: <AccountName> <AccountPassword> <Summoner to lookup>
+// Summoner to lookup can have spaces in name, just write it as it is.
 public class MainTest {
     private static int count = 0;
     private static ReentrantLock lock = new ReentrantLock();
@@ -54,11 +53,19 @@ public class MainTest {
         lock.unlock();
     }
 
+    private static String getSummonerToLookupFromCommandLine(String[] args)
+    {
+        String name = "";
+        for(int i = 2; i < args.length; i++)
+            name += args[i] + " ";
+        return name.substring(0, name.length() -1);
+    }
+
     public static void main(String[] args) throws Exception {
         final LeagueConnection c = new LeagueConnection(ServerInfo.EUW);
         c.getAccountQueue().addAccount(new LeagueAccount(
-                ServerInfo.EUW, "4.21.14", "SoMuchLuckOmgReport", args[0]));
-        final String SUMMONER_TO_LOOK_UP = "LSC Krautsalat";
+                ServerInfo.EUW, "4.21.14", args[0], args[1]));
+        final String SUMMONER_TO_LOOK_UP = getSummonerToLookupFromCommandLine(args);
 
         Map<LeagueAccount, LeagueException> exceptions = c.getAccountQueue().connectAll();
         if(exceptions != null) {
