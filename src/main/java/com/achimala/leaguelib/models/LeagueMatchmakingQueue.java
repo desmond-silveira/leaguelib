@@ -62,7 +62,11 @@ public enum LeagueMatchmakingQueue {
     /** Ascension games. */
     ASCENSION("ASCENSION"),
     /** Twisted Treeline 6x6 Hexakill games. */
-    HEXAKILL("HEXAKILL");
+    HEXAKILL("HEXAKILL"),
+    /** King Poro games. */
+    KING_PORO_5X5("KING_PORO_5x5"),
+    /** Nemesis games. */
+    COUNTER_PICK("COUNTER_PICK");
     
     private String _displayName;
 
