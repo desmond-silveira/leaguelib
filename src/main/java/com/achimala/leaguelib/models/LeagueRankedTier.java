@@ -23,15 +23,16 @@ public enum LeagueRankedTier {
     GOLD(3),
     PLATINUM(4),
     DIAMOND(5),
-    CHALLENGER(6);
-    
+    MASTER(6),
+    CHALLENGER(7);
+
     private static final double WEIGHT = 350.;
     private int _value;
-    
+
     private LeagueRankedTier(int value) {
         _value = value;
     }
-    
+
     public double getApproximateEloContribution() {
         return _value * WEIGHT;
     }
