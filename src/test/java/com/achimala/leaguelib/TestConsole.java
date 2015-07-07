@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TestConsole {
-    @SuppressWarnings("unchecked")
 
     static final Map<String, ServerInfo> VALUES_BY_NAME;
     static {
@@ -84,6 +83,7 @@ public class TestConsole {
             String service = cmd[0];
             String function = cmd[1];
             String arguments = cmd[2] != null ? cmd[2] : "";
+            @SuppressWarnings("unchecked")
             Object[] params = gson.fromJson(arguments, ArrayList.class).toArray(new Object[0]);
             System.out.println(String.format("CALL %s.%s(%s)", service, function, params.toString()));
 
