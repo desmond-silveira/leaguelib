@@ -81,12 +81,12 @@ public class PlayerStatsService extends LeagueAbstractService {
      * @see {@link LeagueRankedStatType}
      */
     public void fillRankedStats(LeagueSummoner summoner) throws LeagueException {
-        TypedObject obj = call("getAggregatedStats", new Object[] { summoner.getAccountId(), SUMMONERS_RIFT, 4 });
+        TypedObject obj = call("getAggregatedStats", new Object[] { summoner.getAccountId(), SUMMONERS_RIFT, 5 });
         summoner.setRankedStats(new LeagueSummonerRankedStats(obj.getTO("body")));
     }
 
     public void fillRankedStats(final LeagueSummoner summoner, final Callback<LeagueSummoner> callback) {
-        callAsynchronously("getAggregatedStats", new Object[] { summoner.getAccountId(), SUMMONERS_RIFT, 4 }, new Callback<TypedObject>() {
+        callAsynchronously("getAggregatedStats", new Object[] { summoner.getAccountId(), SUMMONERS_RIFT, 5 }, new Callback<TypedObject>() {
             @Override
             public void onCompletion(TypedObject obj) {
                 try {
