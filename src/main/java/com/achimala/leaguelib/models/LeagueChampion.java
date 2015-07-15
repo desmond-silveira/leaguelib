@@ -141,6 +141,7 @@ public class LeagueChampion {
         _modelMap.put(161, "Vel'Koz");
         _modelMap.put(201, "Braum");
         _modelMap.put(222, "Jinx");
+        _modelMap.put(223, "Tahm Kench");
         _modelMap.put(236, "Lucian");
         _modelMap.put(238, "Zed");
         _modelMap.put(245, "Ekko");
