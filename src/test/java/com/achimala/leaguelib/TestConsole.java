@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TestConsole {
-    @SuppressWarnings("unchecked")
 
     static final Map<String, ServerInfo> VALUES_BY_NAME;
     static {
@@ -73,7 +72,7 @@ public class TestConsole {
 
         for(;;) {
             System.out.print("> ");
-            String cmd[] = in.readLine().split(" ");
+            String cmd[] = in.readLine().split(" ", 3);
             if(cmd[0].equals("exit") || cmd[0].equals("quit") || cmd[0].equals("q"))
                 break;
             if(cmd.length < 3) {
@@ -83,9 +82,8 @@ public class TestConsole {
 
             String service = cmd[0];
             String function = cmd[1];
-            String arguments = "";
-            for(int i = 2; i < cmd.length; i++)
-                arguments += cmd[i] + " ";
+            String arguments = cmd[2] != null ? cmd[2] : "";
+            @SuppressWarnings("unchecked")
             Object[] params = gson.fromJson(arguments, ArrayList.class).toArray(new Object[0]);
             System.out.println(String.format("CALL %s.%s(%s)", service, function, params.toString()));
 

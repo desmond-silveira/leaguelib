@@ -29,8 +29,8 @@ public class LeagueSummonerProfileInfo {
         String s1 = obj.getString("seasonOneTier");
         String s2 = obj.getString("seasonTwoTier");
 
-        if (s1 != "null") _seasonOneTier = LeagueRankedTier.valueOf(s1);
-        if (s2 != "null") _seasonTwoTier = LeagueRankedTier.valueOf(s2);
+        if (s1 != null && !"null".equals(s1)) _seasonOneTier = LeagueRankedTier.valueOf(s1);
+        if (s2 != null && !"null".equals(s2)) _seasonTwoTier = LeagueRankedTier.valueOf(s2);
     }
 
     public void setSeasonOneTier(LeagueRankedTier tier) {
