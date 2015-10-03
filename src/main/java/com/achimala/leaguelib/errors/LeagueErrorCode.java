@@ -39,11 +39,18 @@ public enum LeagueErrorCode {
         return _exceptionString;
     }
 
+
     public static LeagueErrorCode getErrorCodeForException(String exceptionString) {
         if (exceptionString != null) {
             for (LeagueErrorCode code : LeagueErrorCode.values()) {
-                if (exceptionString.equals(code.getExceptionString())) {
-                    return code;
+                if (code.getExceptionString() != null) {
+                    if (exceptionString.contains(code.getExceptionString())) {
+                        return code;
+                    }
+                }else{
+                    if (exceptionString.equals(code.getExceptionString())) {
+                        return code;
+                    }
                 }
             }
         }

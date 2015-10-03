@@ -39,6 +39,7 @@ public class GameService extends LeagueAbstractService {
     }
 
     // FIXME: Not sure if this is the right way to handle this
+    // FIXME: 01.01.2015, Kim-Maximilian Nuernberger: Applied workaround we should have an easy to use error object containing the rootcause.
     @Override
     protected TypedObject handleResult(TypedObject result) throws LeagueException {
         if(result.get("result").equals("_error")) {
