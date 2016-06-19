@@ -3,10 +3,11 @@ package com.gvaneyck.rtmp;
 
 /**
  * Class for storing connection information
- * 
+ *
  * @see C:\Riot Games\LeagueofLegends\rads\projects\lol_air_client_config_*\releases\*\deploy\
  */
 public class ServerInfo {
+
     public static final ServerInfo NA = new ServerInfo("NA", "NA1", "North America", "prod.na2.lol.riotgames.com", "https://lq.na2.lol.riotgames.com/");
     public static final ServerInfo EUW = new ServerInfo("EUW", "EUW1", "Europe West", "prod.euw1.lol.riotgames.com", "https://lq.euw1.lol.riotgames.com/");
     public static final ServerInfo EUNE = new ServerInfo("EUNE", "EUN1", "Europe Nordic & East", "prod.eun1.lol.riotgames.com", "https://lq.eun1.lol.riotgames.com/");
@@ -23,6 +24,8 @@ public class ServerInfo {
     public static final ServerInfo TH = new ServerInfo("TH", "TH", "Thailand", "prodth.lol.garenanow.com", "https://lqth.lol.garenanow.com/", true);
     public static final ServerInfo PH = new ServerInfo("PH", "PH", "Phillipines", "prodph.lol.garenanow.com", "https://lqph.lol.garenanow.com/", true);
     public static final ServerInfo VN = new ServerInfo("VN", "VN", "Vietnam", "prodvn.lol.garenanow.com", "https://lqvn.lol.garenanow.com/", true);
+
+    public static final ServerInfo[] servers = {NA, EUW, EUNE, KR, BR, TR, RU, LAN, LAS, OCE, PBE, SG, TW, TH, PH, VN};
 
     public String region;
     public String platform; // The internal platform name, used for spectating
@@ -47,45 +50,17 @@ public class ServerInfo {
     public String toString() {
         return name;
     }
-    
+
     public static ServerInfo fromString(String str) {
         if (str == null) {
             return null;
         }
-        str = str.toUpperCase();
-        if ("NA".equals(str)) {
-            return NA;
-        } else if ("EUW".equals(str)) {
-            return EUW;
-        } else if ("EUNE".equals(str)) {
-            return EUNE;
-        } else if ("KR".equals(str)) {
-            return KR;
-        } else if ("BR".equals(str)) {
-            return BR;
-        } else if ("TR".equals(str)) {
-            return TR;
-        } else if ("RU".equals(str)) {
-            return RU;
-        } else if ("LAN".equals(str)) {
-            return LAN;
-        } else if ("LAS".equals(str)) {
-            return LAS;
-        } else if ("OCE".equals(str)) {
-            return OCE;
-        } else if ("PBE".equals(str)) {
-            return PBE;
-        } else if ("SG".equals(str)) {
-            return SG;
-        } else if ("TW".equals(str)) {
-            return TW;
-        } else if ("TH".equals(str)) {
-            return TH;
-        } else if ("PH".equals(str)) {
-            return PH;
-        } else if ("VN".equals(str)) {
-            return VN;
+
+        for (ServerInfo server : servers) {
+            if (str.equalsIgnoreCase(server.region) || str.equalsIgnoreCase(server.name))
+                return server;
         }
+
         return null;
     }
 }
