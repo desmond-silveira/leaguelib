@@ -53,37 +53,37 @@ public class ServerInfo {
             return null;
         }
         str = str.toUpperCase();
-        if ("NA".equals(str)) {
+        if (str.equals(NA.region) || str.equals(NA.name)) {
             return NA;
-        } else if ("EUW".equals(str)) {
+        } else if (str.equals(EUW.region) || str.equals(EUW.name)) {
             return EUW;
-        } else if ("EUNE".equals(str)) {
+        } else if (str.equals(EUNE.region) || str.equals(EUNE.name)) {
             return EUNE;
-        } else if ("KR".equals(str)) {
+        } else if (str.equals(KR.region) || str.equals(KR.name)) {
             return KR;
-        } else if ("BR".equals(str)) {
+        } else if (str.equals(BR.region) || str.equals(BR.name)) {
             return BR;
-        } else if ("TR".equals(str)) {
+        } else if (str.equals(TR.region) || str.equals(TR.name)) {
             return TR;
-        } else if ("RU".equals(str)) {
+        } else if (str.equals(RU.region) || str.equals(RU.name)) {
             return RU;
-        } else if ("LAN".equals(str)) {
+        } else if (str.equals(LAN.region) || str.equals(LAN.name)) {
             return LAN;
-        } else if ("LAS".equals(str)) {
+        } else if (str.equals(LAS.region) || str.equals(LAS.name)) {
             return LAS;
-        } else if ("OCE".equals(str)) {
+        } else if (str.equals(OCE.region) || str.equals(OCE.name)) {
             return OCE;
-        } else if ("PBE".equals(str)) {
+        } else if (str.equals(PBE.region) || str.equals(PBE.name)) {
             return PBE;
-        } else if ("SG".equals(str)) {
+        } else if (str.equals(SG.region) || str.equals(SG.name)) {
             return SG;
-        } else if ("TW".equals(str)) {
+        } else if (str.equals(TW.region) || str.equals(TW.name)) {
             return TW;
-        } else if ("TH".equals(str)) {
+        } else if (str.equals(TH.region) || str.equals(TH.name)) {
             return TH;
-        } else if ("PH".equals(str)) {
+        } else if (str.equals(PH.region) || str.equals(PH.name)) {
             return PH;
-        } else if ("VN".equals(str)) {
+        } else if (str.equals(VN.region) || str.equals(VN.name)) {
             return VN;
         }
         return null;
