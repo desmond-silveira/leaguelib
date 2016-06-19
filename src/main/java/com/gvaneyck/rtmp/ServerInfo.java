@@ -1,12 +1,16 @@
 package com.gvaneyck.rtmp;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Class for storing connection information
  * 
  * @see C:\Riot Games\LeagueofLegends\rads\projects\lol_air_client_config_*\releases\*\deploy\
  */
 public class ServerInfo {
+
     public static final ServerInfo NA = new ServerInfo("NA", "NA1", "North America", "prod.na2.lol.riotgames.com", "https://lq.na2.lol.riotgames.com/");
     public static final ServerInfo EUW = new ServerInfo("EUW", "EUW1", "Europe West", "prod.euw1.lol.riotgames.com", "https://lq.euw1.lol.riotgames.com/");
     public static final ServerInfo EUNE = new ServerInfo("EUNE", "EUN1", "Europe Nordic & East", "prod.eun1.lol.riotgames.com", "https://lq.eun1.lol.riotgames.com/");
@@ -23,6 +27,8 @@ public class ServerInfo {
     public static final ServerInfo TH = new ServerInfo("TH", "TH", "Thailand", "prodth.lol.garenanow.com", "https://lqth.lol.garenanow.com/", true);
     public static final ServerInfo PH = new ServerInfo("PH", "PH", "Phillipines", "prodph.lol.garenanow.com", "https://lqph.lol.garenanow.com/", true);
     public static final ServerInfo VN = new ServerInfo("VN", "VN", "Vietnam", "prodvn.lol.garenanow.com", "https://lqvn.lol.garenanow.com/", true);
+
+    public static final ServerInfo[] servers = {NA, EUW, EUNE, KR, BR, TR, RU, LAN, LAS, OCE, PBE, SG, TW, TH, PH, VN};
 
     public String region;
     public String platform; // The internal platform name, used for spectating
