@@ -1,12 +1,9 @@
 package com.gvaneyck.rtmp;
 
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Class for storing connection information
- * 
+ *
  * @see C:\Riot Games\LeagueofLegends\rads\projects\lol_air_client_config_*\releases\*\deploy\
  */
 public class ServerInfo {
@@ -53,7 +50,7 @@ public class ServerInfo {
     public String toString() {
         return name;
     }
-    
+
     public static ServerInfo fromString(String str) {
         if (str == null) {
             return null;
